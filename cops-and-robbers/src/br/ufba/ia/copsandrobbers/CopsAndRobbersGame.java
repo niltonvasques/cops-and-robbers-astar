@@ -45,33 +45,6 @@ public class CopsAndRobbersGame implements ApplicationListener {
 	private int xLoc[] = new int[4], yLoc[] = new int[4], speed[] = new int[4];
 	private long searchTime, g_showDirections=0; 
 	
-	//Declare constants
-	public static final int mapWidth = 80, mapHeight = 60, tileSize = 10, numberPeople = 3;
-	public int onClosedList = 10;
-	public static final int notfinished = 0, notStarted = 0;// path-related constants
-	public static final int found = 1, nonexistent = 2; 
-	public static final int walkable = 0, unwalkable = 1;// walkability array constants
-
-	//Create needed arrays
-	public char walkability [][] = new char[mapWidth][mapHeight];
-	int openList[] = new int[mapWidth*mapHeight+2]; //1 dimensional array holding ID# of open list items
-	int whichList[][] = new int[mapWidth+1][mapHeight+1];  //2 dimensional array used to record 
-// 		whether a cell is on the open list or on the closed list.
-	int openX[] = new int[mapWidth*mapHeight+2]; //1d array stores the x location of an item on the open list
-	int openY[] = new int[mapWidth*mapHeight+2]; //1d array stores the y location of an item on the open list
-	int parentX[][] = new int[mapWidth+1][mapHeight+1]; //2d array to store parent of each cell (x)
-	int parentY[][] = new int[mapWidth+1][mapHeight+1]; //2d array to store parent of each cell (y)
-	int Fcost[] = new int[mapWidth*mapHeight+2];	//1d array to store F cost of a cell on the open list
-	int Gcost[][] = new int[mapWidth+1][mapHeight+1]; 	//2d array to store G cost for each cell.
-	int Hcost[] = new int[mapWidth*mapHeight+2];	//1d array to store H cost of a cell on the open list
-	int pathLength[] = new int[numberPeople+1];     //stores length of the found path for critter
-	int pathLocation[] = new int[numberPeople+1];   //stores current position along the chosen path for critter		
-//	int* pathBank [numberPeople+1];
-	
-	//Path reading variables
-	int pathStatus[] = new int[numberPeople+1];
-	int xPath[] = new int[numberPeople+1];
-	int yPath[] = new int[numberPeople+1];
 	
 	@Override
 	public void create() {		
@@ -179,7 +152,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		for (int x = 0; x <= 79; x++){
 			for (int y = 0; y <= 59; y++){
 			//Draw blue walls
-			if (walkability[x][y] == unwalkable) 
+			if (aStar.walkability[x][y] == aStar.unwalkable) 
 				pixmap.drawRectangle(x*10,y*10,10,10);
 		}}		
 		Texture map = new Texture(pixmap);
@@ -203,7 +176,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			for (int y = 0; y <= 59; y++){
 
 				//Draw blue walls
-				if (walkability[x][y] == unwalkable) 
+				if (aStar.walkability[x][y] == aStar.unwalkable) 
 					batch.draw(wallImage,x*10,y*10);
 			}}
 		}
@@ -218,7 +191,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			
 			int x = ((int)touchPos.x)/10;
 			int y = ((int)touchPos.y)/10;
-			walkability[x][y] = (char)(1-walkability[x][y]);
+			aStar.walkability[x][y] = (char)(1-aStar.walkability[x][y]);
 		}
 	}
 	
@@ -246,8 +219,8 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			{
 				for (int x = 0; x <= 79; x++){
 					for (int y = 0; y <= 59; y++){
-					walkability [x][y] = (char)reader.read();
-					if (walkability [x][y] > 1) walkability [x][y] = 0;
+						aStar.walkability [x][y] = (char)reader.read();
+					if (aStar.walkability [x][y] > 1) aStar.walkability [x][y] = 0;
 				}}
 				reader.close();
 			}
@@ -255,7 +228,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			{
 				for (int x = 0; x <= 79; x++){
 					for (int y = 0; y <= 59; y++){
-						walkability [x][y] = walkable;
+						aStar.walkability [x][y] = (char)aStar.walkable;
 				}}
 			}
 		} catch (FileNotFoundException e) {
@@ -295,17 +268,17 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		{
 		//If no path has been generated, generate one. Update it when
 		//the chaser reaches its fifth step on the current path.	
-		if (pathStatus[ID] == notStarted || pathLocation[ID] == 5)
+		if (aStar.pathStatus[ID] == AStar.notStarted || aStar.pathLocation[ID] == 5)
 		{
 			//Generate a new path. Enter coordinates of smiley sprite (xLoc(1)/
 			//yLoc(1)) as the target.
-			pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],
+			aStar.pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],
 				xLoc[targetID],yLoc[targetID]);
 			
 		}} 
 
 	//2.Move chaser.
-		if (pathStatus[ID] == found) MoveSprite(ID);
+		if (aStar.pathStatus[ID] == AStar.found) MoveSprite(ID);
 	}
 	
 	void MoveSmiley(){
@@ -321,13 +294,13 @@ public class CopsAndRobbersGame implements ApplicationListener {
 				
 				//Call the findPath function.
 				long time1 = TimeUtils.millis();
-				pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],(int)touchPos.x,(int)touchPos.y);
+				aStar.pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],(int)touchPos.x,(int)touchPos.y);
 				long time2 = TimeUtils.millis();
 				searchTime = time2-time1;
 			}
 
 		//2.Move smiley.
-			if (pathStatus[ID] == found) MoveSprite(ID);
+			if (aStar.pathStatus[ID] == AStar.found) MoveSprite(ID);
 	}
 	
 	void MoveSprite(int ID){
@@ -337,21 +310,21 @@ public class CopsAndRobbersGame implements ApplicationListener {
 	//2.Move sprite. xLoc/yLoc = current location of sprite. xPath and
 //		yPath = coordinates of next step on the path that were/are
 //		read using the readPath function.
-		if (xLoc[ID] > xPath[ID]) xLoc[ID] = xLoc[ID] - speed[ID];
-		if (xLoc[ID] < xPath[ID]) xLoc[ID] = xLoc[ID] + speed[ID];
-		if (yLoc[ID] > yPath[ID]) yLoc[ID] = yLoc[ID] - speed[ID];		
-		if (yLoc[ID] < yPath[ID]) yLoc[ID] = yLoc[ID] + speed[ID];
+		if (xLoc[ID] > aStar.xPath[ID]) xLoc[ID] = xLoc[ID] - speed[ID];
+		if (xLoc[ID] < aStar.xPath[ID]) xLoc[ID] = xLoc[ID] + speed[ID];
+		if (yLoc[ID] > aStar.yPath[ID]) yLoc[ID] = yLoc[ID] - speed[ID];		
+		if (yLoc[ID] < aStar.yPath[ID]) yLoc[ID] = yLoc[ID] + speed[ID];
 		
 	//3.When sprite reaches the end location square	(end of its current
 //		path) ...		
-		if (pathLocation[ID] == pathLength[ID]) 
+		if (aStar.pathLocation[ID] == aStar.pathLength[ID]) 
 		{
 //			Center the chaser in the square (not really necessary, but 
 //			it looks a little better for the chaser, which moves in 3 pixel
 //			increments and thus isn't always centered when it reaches its
 //			target).
-			if (Math.abs(xLoc[ID] - xPath[ID]) < speed[ID]) xLoc[ID] = xPath[ID];
-			if (Math.abs(yLoc[ID] - yPath[ID]) < speed[ID]) yLoc[ID] = yPath[ID];
+			if (Math.abs(xLoc[ID] - aStar.xPath[ID]) < speed[ID]) xLoc[ID] = aStar.xPath[ID];
+			if (Math.abs(yLoc[ID] - aStar.yPath[ID]) < speed[ID]) yLoc[ID] = aStar.yPath[ID];
 		}
 	}
 	
