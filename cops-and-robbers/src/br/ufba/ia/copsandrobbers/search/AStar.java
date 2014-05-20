@@ -39,7 +39,7 @@ public class AStar {
 	public void InitializePathfinder ()
 	{
 		for (int x = 0; x < numberPeople+1; x++)
-			pathBank[x] = new ArrayList<Integer>(4);
+			pathBank[x] = new ArrayList<Integer>();
 	}
 	
 	public void  EndPathfinder ()
@@ -122,7 +122,6 @@ public class AStar {
 
 		// Repeat the following until the new item in slot #1 sinks to its proper spot in the heap.
 		
-		
 		do
 		{
 		u = v;		
@@ -155,8 +154,8 @@ public class AStar {
 			break; //otherwise, exit loop
 			
 		}
-//		while (!KeyDown(27));//reorder the binary heap
-		while (actualkey.getKeyCode() != KeyEvent.VK_DELETE);
+//		while (!KeyDown(27)); -> O que estava no C++... 27 = Codigo do botão: ESC
+		while (actualkey.getKeyCode() != KeyEvent.VK_ESCAPE);  //Tentei isso, mas não sei como criar a variável actualkey.
 
 
 	//7.    Check the adjacent squares. (Its "children" -- these path children
@@ -223,14 +222,14 @@ public class AStar {
 			openY[newOpenListItemID] = b;//record the x and y coordinates of the new item
 
 			//Figure out its G cost
-			if (abs(a-parentXval) == 1 && abs(b-parentYval) == 1)
+			if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
 				addedGCost = 14;//cost of going to diagonal squares	
 			else	
 				addedGCost = 10;//cost of going to non-diagonal squares				
 			Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost;
 
 			//Figure out its H and F costs and parent
-			Hcost[openList[m]] = 10*(abs(a - targetX) + abs(b - targetY));
+			Hcost[openList[m]] = 10*(Math.abs(a - targetX) + Math.abs(b - targetY));
 			Fcost[openList[m]] = Gcost[a][b] + Hcost[openList[m]];
 			parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
 
@@ -264,7 +263,7 @@ public class AStar {
 		{
 		
 			//Figure out the G cost of this possible new path
-			if (abs(a-parentXval) == 1 && abs(b-parentYval) == 1)
+			if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
 				addedGCost = 14;//cost of going to diagonal tiles	
 			else	
 				addedGCost = 10;//cost of going to non-diagonal tiles				
@@ -353,8 +352,9 @@ public class AStar {
 		while (pathX != startX || pathY != startY);
 
 	//b.Resize the data bank to the right size in bytes
-		pathBank[pathfinderID] = (int*) realloc (pathBank[pathfinderID], pathLength[pathfinderID]*8);
-
+//		pathBank[pathfinderID] = (int*) realloc (pathBank[pathfinderID], pathLength[pathfinderID]*8);
+		
+		
 	//c. Now copy the path information over to the databank. Since we are
 //		working backwards from the target to the start location, we copy
 //		the information to the data bank in reverse order. The result is
@@ -365,8 +365,8 @@ public class AStar {
 		do
 		{
 		cellPosition = cellPosition - 2;//work backwards 2 integers
-		pathBank[pathfinderID] [cellPosition] = pathX;
-		pathBank[pathfinderID] [cellPosition+1] = pathY;
+		pathBank[pathfinderID].set(cellPosition, pathX);
+		pathBank[pathfinderID].set(cellPosition+1, pathY);
 
 	//d.Look up the parent of the current cell.	
 		tempx = parentX[pathX][pathY];		
@@ -398,7 +398,7 @@ public class AStar {
 			{
 				//if just starting or if close enough to center of square
 				if (pathLocation[ID] == 0 || 
-					(abs(currentX - xPath[ID]) < pixelsPerFrame && abs(currentY - yPath[ID]) < pixelsPerFrame))
+					(Math.abs(currentX - xPath[ID]) < pixelsPerFrame && Math.abs(currentY - yPath[ID]) < pixelsPerFrame))
 						pathLocation[ID] = pathLocation[ID] + 1;
 			}
 
@@ -410,8 +410,8 @@ public class AStar {
 			//reached then reset.
 			if (pathLocation[ID] == pathLength[ID]) 
 			{
-				if (abs(currentX - xPath[ID]) < pixelsPerFrame 
-					&& abs(currentY - yPath[ID]) < pixelsPerFrame) //if close enough to center of square
+				if (Math.abs(currentX - xPath[ID]) < pixelsPerFrame 
+					&& Math.abs(currentY - yPath[ID]) < pixelsPerFrame) //if close enough to center of square
 						pathStatus[ID] = notStarted; 
 			}
 		}
@@ -441,7 +441,8 @@ public class AStar {
 		{
 
 		//Read coordinate from bank
-		x = pathBank[pathfinderID] [pathLocation*2-2];
+	//	x = pathBank[pathfinderID] [pathLocation*2-2];
+		x = pathBank[pathfinderID].get(pathLocation*2-2);
 
 		//Adjust the coordinates so they align with the center
 		//of the path square (optional). This assumes that you are using
@@ -465,8 +466,8 @@ public class AStar {
 		{
 
 		//Read coordinate from bank
-		y = pathBank[pathfinderID] [pathLocation*2-1];
-
+		y = pathBank[pathfinderID].get(pathLocation*2-1);
+		
 		//Adjust the coordinates so they align with the center
 		//of the path square (optional). This assumes that you are using
 		//sprites that are centered -- i.e., with the midHandle command.
