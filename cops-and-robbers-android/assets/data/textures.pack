@@ -1,0 +1,33 @@
+
+textures.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+smiley
+  rotate: false
+  xy: 1, 1
+  size: 29, 28
+  orig: 29, 28
+  offset: 0, 0
+  index: -1
+ghost x 10
+  rotate: false
+  xy: 32, 18
+  size: 9, 11
+  orig: 9, 11
+  offset: 0, 0
+  index: -1
+smiley x 10
+  rotate: false
+  xy: 43, 19
+  size: 10, 10
+  orig: 10, 10
+  offset: 0, 0
+  index: -1
+wall x 10
+  rotate: false
+  xy: 32, 6
+  size: 10, 10
+  orig: 10, 10
+  offset: 0, 0
+  index: -1
