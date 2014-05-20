@@ -58,15 +58,10 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		batch = new SpriteBatch();
 		batch.setProjectionMatrix(camera.combined);
 		
-		texture = new Texture(Gdx.files.internal("data/libgdx.png"));
-		texture.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		
-		TextureRegion region = new TextureRegion(texture, 0, 0, 512, 275);
-		
 		LoadMapData();
 		LoadUnitData();
 		LoadGraphics();
-//		InitializePathfinder();
+		aStar.InitializePathfinder();
 	}
 
 	@Override

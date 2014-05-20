@@ -2,8 +2,12 @@ package br.ufba.ia.copsandrobbers.search;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 
 public class AStar {
 	
@@ -39,7 +43,7 @@ public class AStar {
 	public void InitializePathfinder ()
 	{
 		for (int x = 0; x < numberPeople+1; x++)
-			pathBank[x] = new ArrayList<Integer>();
+			pathBank[x] = new Vector<Integer>();
 	}
 	
 	public void  EndPathfinder ()
@@ -154,8 +158,8 @@ public class AStar {
 			break; //otherwise, exit loop
 			
 		}
-//		while (!KeyDown(27)); -> O que estava no C++... 27 = Codigo do botão: ESC
-		while (actualkey.getKeyCode() != KeyEvent.VK_ESCAPE);  //Tentei isso, mas não sei como criar a variável actualkey.
+//		while (!KeyDown(27)); -> O que estava no C++... 27 = Codigo do botï¿½o: ESC
+		while (Gdx.input.isKeyPressed(Keys.ESCAPE));  //Tentei isso, mas nï¿½o sei como criar a variï¿½vel actualkey.
 
 
 	//7.    Check the adjacent squares. (Its "children" -- these path children
@@ -184,7 +188,7 @@ public class AStar {
 		{
 			if (b == parentYval-1)
 			{
-				if (walkability[parentXval-1][parentYval] == unwalkable || walkability[parentXval][parentYval-1] == unwalkable) \ corner = unwalkable;
+				if (walkability[parentXval-1][parentYval] == unwalkable || walkability[parentXval][parentYval-1] == unwalkable)  corner = unwalkable;
 			}
 			else if (b == parentYval+1)
 			{
@@ -436,7 +440,7 @@ public class AStar {
 	//-----------------------------------------------------------------------------
 	int ReadPathX(int pathfinderID,int pathLocation)
 	{
-		int x;
+		int x = 0;
 		if (pathLocation <= pathLength[pathfinderID])
 		{
 
@@ -448,9 +452,10 @@ public class AStar {
 		//of the path square (optional). This assumes that you are using
 		//sprites that are centered -- i.e., with the midHandle command.
 		//Otherwise you will want to adjust this.
-		x = tileSize*x + .5*tileSize;
+		x = (int) (tileSize*x + .5*tileSize);
 		
 		}
+		
 		return x;
 	}	
 
@@ -461,7 +466,7 @@ public class AStar {
 	//-----------------------------------------------------------------------------
 	int ReadPathY(int pathfinderID,int pathLocation)
 	{
-		int y;
+		int y = 0;
 		if (pathLocation <= pathLength[pathfinderID])
 		{
 
@@ -472,7 +477,7 @@ public class AStar {
 		//of the path square (optional). This assumes that you are using
 		//sprites that are centered -- i.e., with the midHandle command.
 		//Otherwise you will want to adjust this.
-		y = tileSize*y + .5*tileSize;
+		y = (int) ( tileSize*y + .5*tileSize);
 		
 		}
 		return y;
