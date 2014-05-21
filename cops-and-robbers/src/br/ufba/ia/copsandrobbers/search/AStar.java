@@ -173,8 +173,6 @@ public class AStar {
 						// Se não sair do mapa (faça isto primeiro para evitar erros de ArrayIndexOutOfBounds).
 						if (a != -1 && b != -1 && a != mapWidth && b != mapHeight){
 
-							//		If not already on the closed list (items on the closed list have
-							//		already been considered and can now be ignored).
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
 							if (whichList[a][b] != onClosedList) { 
 
