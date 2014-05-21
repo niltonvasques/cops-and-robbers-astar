@@ -1,3 +1,5 @@
+
+/*Alterado*/
 package br.ufba.ia.copsandrobbers.search;
 
 import java.util.ArrayList;
