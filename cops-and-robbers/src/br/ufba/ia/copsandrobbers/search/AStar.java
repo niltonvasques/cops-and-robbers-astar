@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Array;
 public class AStar {
 	
 	//Declare constants
-	public static final int mapWidth = 80, mapHeight = 60, tileSize = 20, numberPeople = 3;
+	public static final int mapWidth = 80, mapHeight = 60, tileSize = 10, numberPeople = 3;
 	public static final int notfinished = 0, notStarted = 0; // path-related constants
 	public static final int found = 1, nonexistent = 2; 
 	public static final int walkable = 0, unwalkable = 1;    // walkability array constants
