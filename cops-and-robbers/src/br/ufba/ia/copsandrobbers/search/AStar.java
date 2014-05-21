@@ -93,20 +93,20 @@ public class AStar {
 			}
 			onClosedList = 10;	
 		}
-		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list é mais rapida do que redimming whichList() array;
+		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list eh mais rapida do que redimensionar whichList() array;
 		onOpenList = onClosedList-1;
 		pathLength [pathfinderID] = notStarted;//i.e, = 0
 		pathLocation [pathfinderID] = notStarted;//i.e, = 0
 		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
-		//4. Adicionando a posição inicial openList de quadrados para serem verificados.
+		//4. Adicionando a posicao inicial openList de quadrados para serem verificados.
 		numberOfOpenListItems = 1;
-		openList[1] = 1;		//colocando este como o item do topo(e atualmente somente) da openList, que é mantida como uma heap binaria.
+		openList[1] = 1;		//colocando este como o item do topo(e atualmente somente) da openList, que eh mantida como uma heap binaria.
 
 		openX[1] = startX;
 		openY[1] = startY;
 
-		//5. Faça o seguinte até que um caminho é encontrador ou ele não exista.
+		//5. Faca o seguinte ate que um caminho eh encontrador ou ele nao exista.
 		do
 		{
 
