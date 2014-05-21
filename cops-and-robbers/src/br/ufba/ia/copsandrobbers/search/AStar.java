@@ -1,4 +1,7 @@
 
+
+
+
 /*Alterado*/
 package br.ufba.ia.copsandrobbers.search;
 
