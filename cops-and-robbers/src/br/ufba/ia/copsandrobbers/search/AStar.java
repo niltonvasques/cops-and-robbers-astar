@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Array;
 public class AStar {
 	
 	//Declare constants
-	public static final int mapWidth = 80, mapHeight = 60, tileSize = 10, numberPeople = 3;
+	public static final int mapWidth = 80, mapHeight = 60, tileSize = 20, numberPeople = 3;
 	public static final int notfinished = 0, notStarted = 0; // path-related constants
 	public static final int found = 1, nonexistent = 2; 
 	public static final int walkable = 0, unwalkable = 1;    // walkability array constants
@@ -240,7 +240,7 @@ public class AStar {
 			Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost;
 
 			//Figure out its H and F costs and parent
-			Hcost[openList[m]] = 10*(Math.abs(a - targetX) + Math.abs(b - targetY));
+			Hcost[openList[m]] = AStar.tileSize*(Math.abs(a - targetX) + Math.abs(b - targetY));
 			Fcost[openList[m]] = Gcost[a][b] + Hcost[openList[m]];
 			parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
 
@@ -463,7 +463,7 @@ public class AStar {
 		//of the path square (optional). This assumes that you are using
 		//sprites that are centered -- i.e., with the midHandle command.
 		//Otherwise you will want to adjust this.
-		x = (int) (tileSize*x + .5*tileSize);
+		x = (int) (tileSize*x);
 		
 		}
 		
@@ -489,7 +489,7 @@ public class AStar {
 		//of the path square (optional). This assumes that you are using
 		//sprites that are centered -- i.e., with the midHandle command.
 		//Otherwise you will want to adjust this.
-		y = (int) ( tileSize*y + .5*tileSize);
+		y = (int) ( tileSize*y);
 		
 		}
 		return y;
