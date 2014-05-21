@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -269,8 +268,13 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		{
 			//Generate a new path. Enter coordinates of smiley sprite (xLoc(1)/
 			//yLoc(1)) as the target.
-			aStar.pathStatus[ID] = aStar.FindPathBuscaCega(ID,xLoc[ID],yLoc[ID],
-				xLoc[targetID],yLoc[targetID]);
+			if(ID == 2){
+				aStar.pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],
+						xLoc[targetID],yLoc[targetID]);
+			}else{
+				aStar.pathStatus[ID] = aStar.FindPathBuscaCega(ID,xLoc[ID],yLoc[ID],
+					xLoc[targetID],yLoc[targetID]);
+			}
 			
 		}} 
 
