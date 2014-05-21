@@ -1,6 +1,7 @@
 package br.ufba.ia.copsandrobbers.search;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import java.awt.event.KeyEvent;
@@ -8,6 +9,7 @@ import java.awt.event.KeyListener;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.utils.Array;
 
 public class AStar {
 	
@@ -34,6 +36,7 @@ public class AStar {
 	public int[] pathLocation = new int[numberPeople+1];   //stores current position along the chosen path for critter		
 	//int* pathBank [numberPeople+1];
 	public List<Integer> pathBank[] = new List[numberPeople+1];
+	public List<Integer[]> pathBank2 = new ArrayList<Integer[]>();
 	
 	//Path reading variables
 	public int[] pathStatus = new int[numberPeople+1];
@@ -42,14 +45,18 @@ public class AStar {
 	
 	public void InitializePathfinder ()
 	{
-		for (int x = 0; x < numberPeople+1; x++)
+		for (int x = 0; x < numberPeople+1; x++){
 			pathBank[x] = new Vector<Integer>();
+			pathBank2.add(new Integer[4]);
+		}
 	}
 	
 	public void  EndPathfinder ()
 	{
-		for (int x = 0; x < numberPeople+1; x++)
+		for (int x = 0; x < numberPeople+1; x++){
 			pathBank[x].clear();
+			pathBank2.set(x, null);
+		}
 	}
 	
 	public int FindPath (int pathfinderID, int startingX, int startingY,
@@ -357,7 +364,8 @@ public class AStar {
 
 	//b.Resize the data bank to the right size in bytes
 //		pathBank[pathfinderID] = (int*) realloc (pathBank[pathfinderID], pathLength[pathfinderID]*8);
-		
+		Integer[] arr = pathBank2.get(pathfinderID);
+		pathBank2.set(pathfinderID, Arrays.copyOf(arr, pathLength[pathfinderID]*8));
 		
 	//c. Now copy the path information over to the databank. Since we are
 //		working backwards from the target to the start location, we copy
@@ -369,8 +377,10 @@ public class AStar {
 		do
 		{
 		cellPosition = cellPosition - 2;//work backwards 2 integers
-		pathBank[pathfinderID].set(cellPosition, pathX);
-		pathBank[pathfinderID].set(cellPosition+1, pathY);
+//		pathBank[pathfinderID].set(cellPosition, pathX);
+//		pathBank[pathfinderID].set(cellPosition+1, pathY);
+		pathBank2.get(pathfinderID)[cellPosition] = pathX;
+		pathBank2.get(pathfinderID)[cellPosition+1] = pathY;
 
 	//d.Look up the parent of the current cell.	
 		tempx = parentX[pathX][pathY];		
@@ -446,7 +456,8 @@ public class AStar {
 
 		//Read coordinate from bank
 	//	x = pathBank[pathfinderID] [pathLocation*2-2];
-		x = pathBank[pathfinderID].get(pathLocation*2-2);
+//		x = pathBank[pathfinderID].get(pathLocation*2-2);
+		x = pathBank2.get(pathfinderID)[pathLocation*2-2];
 
 		//Adjust the coordinates so they align with the center
 		//of the path square (optional). This assumes that you are using
@@ -471,7 +482,8 @@ public class AStar {
 		{
 
 		//Read coordinate from bank
-		y = pathBank[pathfinderID].get(pathLocation*2-1);
+//		y = pathBank[pathfinderID].get(pathLocation*2-1);
+		y = pathBank2.get(pathfinderID)[pathLocation*2-1];
 		
 		//Adjust the coordinates so they align with the center
 		//of the path square (optional). This assumes that you are using
