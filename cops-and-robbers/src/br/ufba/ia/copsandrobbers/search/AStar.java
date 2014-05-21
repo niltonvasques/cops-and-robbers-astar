@@ -167,7 +167,7 @@ public class AStar {
 			
 		}
 //		while (!KeyDown(27)); -> O que estava no C++... 27 = Codigo do bot�o: ESC
-		while (Gdx.input.isKeyPressed(Keys.ESCAPE));  //Tentei isso, mas n�o sei como criar a vari�vel actualkey.
+		while (!(Gdx.input.isKeyPressed(Keys.ESCAPE)));  //Tentei isso, mas n�o sei como criar a vari�vel actualkey.
 
 
 	//7.    Check the adjacent squares. (Its "children" -- these path children
