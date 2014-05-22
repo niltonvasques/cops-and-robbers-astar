@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.sun.org.apache.bcel.internal.generic.GOTO;
 
 public class AStar {
 
@@ -488,7 +489,8 @@ public class AStar {
 	public int FindPathBuscaCega (int pathfinderID, int startingX, int startingY,
 			int targetX, int targetY)
 	{
-		int naListaAberta=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
+		int naListaAberta=0, parentXval=0, parentYval=0, a=0, b=0, corner=0, 
+				path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
 
 		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de espacoDeCaminhada.
 		int startX = startingX/tamanhoPixel;
@@ -525,7 +527,6 @@ public class AStar {
 		naListaAberta = naListaFechada-1;
 		pathLength [pathfinderID] = naoComecou;//i.e, = 0
 		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
-		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posição inicial openList de quadrados para serem verificados.
 		pilha.push(1);
@@ -546,55 +547,13 @@ public class AStar {
 				parentXval = openX[pilha.peek()];
 				parentYval = openY[pilha.peek()]; //Grave as coordenadas da celula do item
 
-				//listaAberta = Heap binária: Delete este item da listaAberta, que é mantido como uma heap binária. Para mais informações veja:
-				// http://www.policyalmanac.org/games/binaryHeaps.htm
-				numItemsListaAberta = numItemsListaAberta - 1;//reduzindo o numero de items da listaAberta em 1	
-
-				// Delete o item do topo na heap binaria, e reordene a heap, com o item de menor custo da função F indo para o topo.
-				listaAberta[1] = listaAberta[numItemsListaAberta+1];//mova o ultimo item na heap a cima para o slot #1
-				v = 1;
-
-				//Repita o seguinte até que o novo item no slot1 caia para a sua própria posição na heap.
-				do
-				{
-					u = v;		
-					if (2*u+1 <= numItemsListaAberta) //Se ambos os filhos existirem
-					{
-						//Verifique se o custo de F do pai é maior do que cada filho.
-						//Selecione o menor dos dois filhos.
-						if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
-							v = 2*u;
-						if (Fcost[listaAberta[v]] >= Fcost[listaAberta[2*u+1]]) 
-							v = 2*u+1;		
-					}
-					else
-					{
-						if (2*u <= numItemsListaAberta) //Se somente o filho 1 existe
-						{
-							//Verifique se o custo de F do pai é maior do que o filho 1.
-							if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
-								v = 2*u;
-						}
-					}
-
-					if (u != v) //Se o custo de F do pai é > do um dos filhos troque eles.
-					{
-						temp = listaAberta[u];
-						listaAberta[u] = listaAberta[v];
-						listaAberta[v] = temp;			
-					}
-					else
-						break; //de outro modo, saia do loop
-
-				}
-				while (!(Gdx.input.isKeyPressed(Keys.ESCAPE)));  //Tentei isso, mas n�o sei como criar a vari�vel actualkey.
-
 				//7. Verifique os quadrados adjacentes. (Estes "filhos" -- aquele caminho dos filhos são similares,
 				//conceitualmente, para a heap binaria mencionada a cima, mas não confuda eles. Eles são diferentes.
 				//O caminho dos filhos são descritos no Demo 1 com pontos cinzas a frente dos pais.) Adicione aqueles 
 				//quadrados dos filhos adjacens para a listaAberta para posterior consideração se apropriado. (ver vários blocos abaixo).
-				for (b = parentYval-1; b <= parentYval+1; b++){
-					for (a = parentXval-1; a <= parentXval+1; a++){
+				boolean vizinhoDisponivel = false;
+				for (b = parentYval-1; b <= parentYval+1 && !vizinhoDisponivel; b++){
+					for (a = parentXval-1; a <= parentXval+1 && !vizinhoDisponivel; a++){
 
 						// Se não sair do mapa (faça isto primeiro para evitar erros de ArrayIndexOutOfBounds).
 						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
@@ -643,103 +602,30 @@ public class AStar {
 
 											//Cria um item novo na listaAberta na heap binaria.
 											novoIDItemListaAberta = novoIDItemListaAberta + 1; //Cada novo item tem um ID unico.
-											m = numItemsListaAberta+1;
-											listaAberta[m] = novoIDItemListaAberta;// Coloque o novo item da listaAberta(atualmente ID#) na base da heap.
+											
+											pilha.push(novoIDItemListaAberta);
+											
+//											listaAberta[m] = novoIDItemListaAberta;// Coloque o novo item da listaAberta(atualmente ID#) na base da heap.
 											openX[novoIDItemListaAberta] = a;
 											openY[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
 
-											//Calculando o custo de G
-											if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
-												addedGCost = 14;//custo de ir pelas diagonais dos quadrados;	
-											else	
-												addedGCost = 10;//custo de ir em não diagonais.		
-											Gcost[a][b] = 1;
-
-											//Calcular os custos H e F e o pai
-											Hcost[listaAberta[m]] = 1;
-											Fcost[listaAberta[m]] = Gcost[a][b] + Hcost[listaAberta[m]];
-											parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
-
-											//Mover o novo item da listaAberta para o seu pŕoprio lugar na heap binária.
-											//Iniciando da base, sucessivamente comparar items pais, 
-											//trocando quando necessário até que o item encontre seu lugar na heap.
-											//ou borbulhando todos os caminhos para o topo (se este tem o menor custo de F).
-											while (m != 1) //Enquanto o item não tem sido borbulhado para o topo(m=1)	
-											{
-												//Verifique se o custo F do filho é < o custo F do pai. Se for, troque-os.
-												if (Fcost[listaAberta[m]] <= Fcost[listaAberta[m/2]])
-												{
-													temp = listaAberta[m/2];
-													listaAberta[m/2] = listaAberta[m];
-													listaAberta[m] = temp;
-													m = m/2;
-												}
-												else
-													break;
-											}
-											numItemsListaAberta = numItemsListaAberta+1;//Adicione um para o número de items na heap
+											parentX[a][b] = parentXval; 
+											parentY[a][b] = parentYval;	
 
 											//Troque whichList para mostrar que o novo item está na listaAberta.
 											whichList[a][b] = naListaAberta;
+											
+											vizinhoDisponivel = true;
 										}
-
-										//8.If adjacent cell is already on the open list, check to see if this
-										//8. Se a célula adjacente já está na listaAberta, verifique para ver se este
-										//		caminho para a aquela célula da posição inicial, é um melhor.
-										//		Se for, troque o pai da célula e seus custos G e F.	
-										else //Se whichList(a,b) = naListaAberta
-										{
-
-											//Calcular o custo G deste possível caminho novo.
-											if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
-												addedGCost = 14;//Custo de ir pelas diagonais	
-											else	
-												addedGCost = 10;//Custo de ir por não diagonais.				
-											tempGcost = Gcost[parentXval][parentYval];
-
-											//Se este caminho é curto ( custo de G é baixo) então troque
-											//a célula pai, custo de G e custo de F.
-											if (tempGcost < Gcost[a][b]) //Se o custo de G é menor,
-											{
-												parentX[a][b] = parentXval; //troque o quadrado pai
-												parentY[a][b] = parentYval;
-												Gcost[a][b] = tempGcost;//troque o custo de G			
-
-												//Porque trocando o custo de G também muda o custo de F, se 
-												//o item está na listaAberta nós precisamos alterar o custo F 
-												//gravado no item e sua posição na listaAberta para ter certeza 
-												//que nós mantemos uma listaAberta corretamente ordenada.
-												for (int x = 1; x <= numItemsListaAberta; x++) //olho para o item na listaAberta
-												{
-													if (openX[listaAberta[x]] == a && openY[listaAberta[x]] == b) //item encontrado
-													{
-														Fcost[listaAberta[x]] = Gcost[a][b] + Hcost[listaAberta[x]];//troque o custo F
-
-														//Veja se alterando o bubbles score de F do item a cima da sua localização corrente na heap.
-														m = x;
-														while (m != 1) //Enquanto o item não foi borbulhado para o topo (m = 1).	
-														{
-															//Verifique se o filho é < pai. Se for, troque-os.
-															if (Fcost[listaAberta[m]] < Fcost[listaAberta[m/2]])
-															{
-																temp = listaAberta[m/2];
-																listaAberta[m/2] = listaAberta[m];
-																listaAberta[m] = temp;
-																m = m/2;
-															}
-															else
-																break;
-														} 
-														break; //saia para x = loop
-													} //Se openX(listaAberta(x)) = a
-												} //For x = 1 To numItemsListaAberta
-											}//If tempGcost < Gcost(a,b)
-
-										}//else If whichList(a,b) = naListaAberta	
 									}//If não cortando um canto
+									
 								}//If não um quadrado parede.
 							}//If não já está na closedList 
 						}//If não está fora do mapa.
+						if( a == parentXval+1 && b == parentYval+1 && !vizinhoDisponivel){
+							int item = pilha.pop();
+							whichList[parentXval][parentYval] = naListaFechada;
+						}
 					}//for (a = parentXval-1; a <= parentXval+1; a++){
 				}//for (b = parentYval-1; b <= parentYval+1; b++){
 
@@ -764,20 +650,7 @@ public class AStar {
 		if (path == encontrado)
 		{
 
-			//a. Trabalhando para trás do alvo para a posição inicial, verificando 
-			//		cada célula pai, calcular o tamanho do caminho.
-			pathX = targetX; pathY = targetY;
-			do
-			{
-				//Visitar o pai da célula corrente.
-				tempx = parentX[pathX][pathY];		
-				pathY = parentY[pathX][pathY];
-				pathX = tempx;
-
-				//Calcular o tamanho do caminho.
-				pathLength[pathfinderID] = pathLength[pathfinderID] + 1;
-			}
-			while (pathX != startX || pathY != startY);
+			pathLength[pathfinderID] = pilha.size();
 
 			//b.Redimensione o dataBank para o correto tamanho em bytes.
 			Integer[] arr = pathBank2.get(pathfinderID);
@@ -788,7 +661,9 @@ public class AStar {
 			//		copiamos a informação para o data bank na ordem reversa. O resultado é
 			//		um conjunto corretamente ordenado de dados do caminho, para o primeiro passo
 			//		até o último.
-			pathX = targetX ; pathY = targetY;
+			int itemID = pilha.pop();
+			pathX = openX[itemID]; 
+			pathY = openY[itemID];
 			cellPosition = pathLength[pathfinderID]*2;//Inicie do final	
 			do
 			{
@@ -797,13 +672,18 @@ public class AStar {
 				pathBank2.get(pathfinderID)[cellPosition+1] = pathY;
 	
 				//d. Visite o pai da célula atual.
-				tempx = parentX[pathX][pathY];		
-				pathY = parentY[pathX][pathY];
-				pathX = tempx;
+				itemID = pilha.pop();
+				pathX = openX[itemID]; 
+				pathY = openY[itemID];
+				
+//				tempx = parentX[pathX][pathY];		
+//				pathY = parentY[pathX][pathY];
+//				pathX = tempx;
 
 				//e. Se nós temos encontrado o quadrado incial, saia do loop.
 			}
-			while (pathX != startX || pathY != startY);	
+			while(!pilha.isEmpty());
+//			while (pathX != startX || pathY != startY);	
 
 			//11. Leia o primeiro passo dentro dos arrays xPath/yPath. 
 			ReadPath(pathfinderID,startingX,startingY,1);
