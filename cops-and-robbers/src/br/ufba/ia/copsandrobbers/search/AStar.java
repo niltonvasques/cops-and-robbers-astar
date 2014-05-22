@@ -449,6 +449,10 @@ public class AStar {
 		{
 
 			//Le a coordenada X do patharquivaCaminho
+			Integer arr[] = arquivaCaminho2.get(caminhoBuscadorID);
+			if(arr[localizacaoDoCaminho*2-2] == null){
+				System.out.println("error");
+			}
 			x = arquivaCaminho2.get(caminhoBuscadorID)[localizacaoDoCaminho*2-2];
 
 			//Ajusta a coordenada para ela ficar alinhada ao inicio do quadrado. 
@@ -524,6 +528,7 @@ public class AStar {
 			}
 			naListaFechada = 10;	
 		}
+		pilha.clear();
 		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list é mais rapida do que redimming queLista() array;
 		naListaAberta = naListaFechada-1;
 		tamanhoDoCaminho [caminhoBuscadorID] = naoComecou;//i.e, = 0
@@ -651,7 +656,7 @@ public class AStar {
 		if (caminho == encontrado)
 		{
 
-			tamanhoDoCaminho[caminhoBuscadorID] = pilha.size();
+			tamanhoDoCaminho[caminhoBuscadorID] = pilha.size()-1;
 
 			//b.Redimensione o dataBank para o correto tamanho em bytes.
 			Integer[] arr = arquivaCaminho2.get(caminhoBuscadorID);
@@ -673,22 +678,22 @@ public class AStar {
 				arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula+1] = tragetoriaY;
 	
 				//d. Visite o pai da célula atual.
-//				itemID = pilha.pop();
-//				tragetoriaX = xAberta[itemID]; 
-//				tragetoriaY = yAberta[itemID];
+				itemID = pilha.pop();
+				tragetoriaX = xAberta[itemID]; 
+				tragetoriaY = yAberta[itemID];
 				
-				tempx = xPai[tragetoriaX][tragetoriaY];		
-				tragetoriaY = yPai[tragetoriaX][tragetoriaY];
-				tragetoriaX = tempx;
+//				tempx = xPai[tragetoriaX][tragetoriaY];		
+//				tragetoriaY = yPai[tragetoriaX][tragetoriaY];
+//				tragetoriaX = tempx;
 
 				//e. Se nós temos encontrado o quadrado incial, saia do loop.
 			}
-			while (tragetoriaX != inicioX || tragetoriaY != inicioY);	
-//			while(!pilha.isEmpty());
-			
-			posicaoDaCelula = posicaoDaCelula - 2;//trabalhe 2 inteiros para trás
-			arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula] = tragetoriaX;
-			arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula+1] = tragetoriaY;
+//			while (tragetoriaX != inicioX || tragetoriaY != inicioY);	
+			while(!pilha.isEmpty());
+//			
+//			posicaoDaCelula = posicaoDaCelula - 2;//trabalhe 2 inteiros para trás
+//			arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula] = tragetoriaX;
+//			arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula+1] = tragetoriaY;
 
 			//11. Leia o primeiro passo dentro dos arrays caminhoX/caminhoY. 
 			leituraDoCaminho(caminhoBuscadorID,origemX,origemY,1);
