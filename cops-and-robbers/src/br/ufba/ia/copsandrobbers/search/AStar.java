@@ -4,6 +4,7 @@ package br.ufba.ia.copsandrobbers.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 import java.util.Vector;
 
 import com.badlogic.gdx.Gdx;
@@ -96,7 +97,7 @@ public class AStar {
 			}
 			onClosedList = 10;	
 		}
-		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list eh mais rapida do que redimensionar whichList() array;
+		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list é mais rapido do que redimming whichList() array;
 		onOpenList = onClosedList-1;
 		pathLength [pathfinderID] = naoComecou;//i.e, = 0
 		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
@@ -482,6 +483,8 @@ public class AStar {
 		return y;
 	}
 	
+	private Stack<Integer> pilha = new Stack<Integer>();
+	
 	public int FindPathBuscaCega (int pathfinderID, int startingX, int startingY,
 			int targetX, int targetY)
 	{
@@ -509,6 +512,7 @@ public class AStar {
 			return naoExiste;
 		}
 
+		pilha.clear();
 		//3. Resetando algumas variáveis que precisam ser limpas
 		if (onClosedList > 1000000) //Resetando whichList ocasionalmente
 		{
@@ -518,15 +522,13 @@ public class AStar {
 			}
 			onClosedList = 10;	
 		}
-		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list é mais rapida do que redimming whichList() array;
-		onOpenList = onClosedList-1;
+				
+		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list é mais rapido do que redimming whichList() array;
 		pathLength [pathfinderID] = naoComecou;//i.e, = 0
 		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
-		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posição inicial openList de quadrados para serem verificados.
-		numberOfOpenListItems = 1;
-		openList[1] = 1;		//colocando este como o item do topo(e atualmente somente) da openList, que é mantida como uma heap binaria.
+		pilha.push(1);
 
 		openX[1] = startX;
 		openY[1] = startY;
@@ -537,13 +539,12 @@ public class AStar {
 
 			//6. Se a openList não é vazia, pegue a primeira célula da lista.
 			//	Esta possui o menor custo da função F na openList.
-			if (numberOfOpenListItems != 0)
+			if (!pilha.isEmpty())
 			{
 
 				//7. Remova o primeiro item da openList.
-				parentXval = openX[openList[1]];
-				parentYval = openY[openList[1]]; //Grave as coordenadas da celula do item
-				whichList[parentXval][parentYval] = onClosedList;//adicione o item para a closedList
+				parentXval = openX[pilha.peek()];
+				parentYval = openY[pilha.peek()]; //Grave as coordenadas da celula do item
 
 				//OpenList = Heap binária: Delete este item da openList, que é mantido como uma heap binária. Para mais informações veja:
 				// http://www.policyalmanac.org/games/binaryHeaps.htm
@@ -636,7 +637,8 @@ public class AStar {
 									}	
 									if (corner == caminhoPassavel) {
 
-										//		Se não já está na openList, adicione este para a openlist.			
+										//		Se não já está na openList, adicione este para a openlist.
+										
 										if (whichList[a][b] != onOpenList) 
 										{	
 
