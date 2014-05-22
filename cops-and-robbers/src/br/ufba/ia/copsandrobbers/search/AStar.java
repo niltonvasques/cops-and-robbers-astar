@@ -24,46 +24,46 @@ public class AStar {
 	//Create needed arrays
 	public char[][] espacoDeCaminhada = new char[larguraTela][alturaTela];
 	public int[] listaAberta = new int[larguraTela*alturaTela+2]; //array de 1 dimensão que segunda uma lista aberta de items
-	public int[][] whichList = new int[larguraTela+1][alturaTela+1];  //array de 2 dimensões usado para gravar  
+	public int[][] queLista = new int[larguraTela+1][alturaTela+1];  //array de 2 dimensões usado para gravar  
 	// 		se uma célula está na lista aberta ou na lista fechada.
-	public int[] openX = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição x de um item na lista aberta.
-	public int[] openY = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição y de um item na lista aberta.
-	public int[][] parentX = new int[larguraTela+1][alturaTela+1]; //array de 2 dimensões para armazenar o pai de cada célular x
-	public int[][] parentY = new int[larguraTela+1][alturaTela+1]; //array de 2 dimensões para armazenar o pai de cada célula y
-	public int[] Fcost = new int[larguraTela*alturaTela+2];	//array de 1 dimensão para armazenar o custo F de cada célula.
-	public int[][] Gcost = new int[larguraTela+1][alturaTela+1]; 	//array de 2 dimensões para armazenar o custo G para cada célula
-	public int[] Hcost = new int[larguraTela*alturaTela+2];	//array de 1 dimensão para armazenar o custo H de cada célula na lista aberta
-	public int[] pathLength = new int[qtdeAgentes+1];     //armazena o tamanho do caminho encontrado para a criatura
-	public int[] pathLocation = new int[qtdeAgentes+1];   //armazena a posição atual ao longo do caminho escolhido para a criatura		
-	//int* pathBank [qtdeAgentes+1];
-	public List<Integer> pathBank[] = new List[qtdeAgentes+1];
-	public List<Integer[]> pathBank2 = new ArrayList<Integer[]>();
+	public int[] xAberta = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição x de um item na lista aberta.
+	public int[] yAberta = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição y de um item na lista aberta.
+	public int[][] xPai = new int[larguraTela+1][alturaTela+1]; //array de 2 dimensões para armazenar o pai de cada célular x
+	public int[][] yPai = new int[larguraTela+1][alturaTela+1]; //array de 2 dimensões para armazenar o pai de cada célula y
+	public int[] custoF = new int[larguraTela*alturaTela+2];	//array de 1 dimensão para armazenar o custo F de cada célula.
+	public int[][] custoG = new int[larguraTela+1][alturaTela+1]; 	//array de 2 dimensões para armazenar o custo G para cada célula
+	public int[] custoH = new int[larguraTela*alturaTela+2];	//array de 1 dimensão para armazenar o custo H de cada célula na lista aberta
+	public int[] tamanhoDoCaminho = new int[qtdeAgentes+1];     //armazena o tamanho do caminho encontrado para a criatura
+	public int[] localizacaoDoCaminho = new int[qtdeAgentes+1];   //armazena a posição atual ao longo do caminho escolhido para a criatura		
+	//int* arquivaCaminho [qtdeAgentes+1];
+	public List<Integer> arquivaCaminho[] = new List[qtdeAgentes+1];
+	public List<Integer[]> arquivaCaminho2 = new ArrayList<Integer[]>();
 
 	//Path reading variables
-	public int[] pathStatus = new int[qtdeAgentes+1];
-	public int[] xPath = new int[qtdeAgentes+1];
-	public int[] yPath = new int[qtdeAgentes+1];
+	public int[] statusDoCaminho = new int[qtdeAgentes+1];
+	public int[] caminhoX = new int[qtdeAgentes+1];
+	public int[] caminhoY = new int[qtdeAgentes+1];
 
-	public void InitializePathfinder ()
+	public void inicializarBuscadorDeCaminho()
 	{
 		for (int x = 0; x < qtdeAgentes+1; x++){
-			pathBank[x] = new Vector<Integer>();
-			pathBank2.add(new Integer[4]);
+			arquivaCaminho[x] = new Vector<Integer>();
+			arquivaCaminho2.add(new Integer[4]);
 		}
 	}
 
-	public void  EndPathfinder ()
+	public void  finalizarBuscadorDeCaminho()
 	{
 		for (int x = 0; x < qtdeAgentes+1; x++){
-			pathBank[x].clear();
-			pathBank2.set(x, null);
+			arquivaCaminho[x].clear();
+			arquivaCaminho2.set(x, null);
 		}
 	}
 
-	public int FindPath (int pathfinderID, int startingX, int startingY,
+	public int encontrarCaminho(int pathfinderID, int startingX, int startingY,
 			int targetX, int targetY)
 	{
-		int naListaAberta=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
+		int naListaAberta=0, valorXPai=0, valorYPai=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, adicionadoCustoG=0, custoGTemp = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
 
 		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de espacoDeCaminhada.
 		int startX = startingX/tamanhoPixel;
@@ -74,40 +74,40 @@ public class AStar {
 		//2. Caminhos rápidos: Sobre certas circunstâncias, nenhum caminho é necessário.
 
 		// Se a posição inicial e o destino estão na mesmo lugar
-		if (startX == targetX && startY == targetY && pathLocation[pathfinderID] > 0)
+		if (startX == targetX && startY == targetY && localizacaoDoCaminho[pathfinderID] > 0)
 			return encontrado;
-		if (startX == targetX && startY == targetY && pathLocation[pathfinderID] == 0)
+		if (startX == targetX && startY == targetY && localizacaoDoCaminho[pathfinderID] == 0)
 			return naoExiste;
 
 		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
 		if (espacoDeCaminhada[targetX][targetY] == caminhoBloqueado)
 		{
-			xPath[pathfinderID] = startingX;
-			yPath[pathfinderID] = startingY;
+			caminhoX[pathfinderID] = startingX;
+			caminhoY[pathfinderID] = startingY;
 			return naoExiste;
 		}
 
 		//3. Resetando algumas variáveis que precisam ser limpas
-		if (naListaFechada > 1000000) //Resetando whichList ocasionalmente
+		if (naListaFechada > 1000000) //Resetando queLista ocasionalmente
 		{
 			for (int x = 0; x < larguraTela; x++) {
 				for (int y = 0; y < alturaTela; y++)
-					whichList [x][y] = 0;
+					queLista [x][y] = 0;
 			}
 			naListaFechada = 10;	
 		}
-		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list eh mais rapida do que redimensionar whichList() array;
+		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list eh mais rapida do que redimensionar queLista() array;
 		naListaAberta = naListaFechada-1;
-		pathLength [pathfinderID] = naoComecou;//i.e, = 0
-		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
-		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
+		tamanhoDoCaminho [pathfinderID] = naoComecou;//i.e, = 0
+		localizacaoDoCaminho [pathfinderID] = naoComecou;//i.e, = 0
+		custoG[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posicao inicial listaAberta de quadrados para serem verificados.
 		numItemsListaAberta = 1;
 		listaAberta[1] = 1;		//colocando este como o item do topo(e atualmente somente) da listaAberta, que eh mantida como uma heap binaria.
 
-		openX[1] = startX;
-		openY[1] = startY;
+		xAberta[1] = startX;
+		yAberta[1] = startY;
 
 		//5. Faca o seguinte ate que um caminho eh encontrador ou ele nao exista.
 		do
@@ -119,9 +119,9 @@ public class AStar {
 			{
 
 				//7. Remova o primeiro item da listaAberta.
-				parentXval = openX[listaAberta[1]];
-				parentYval = openY[listaAberta[1]]; //Grave as coordenadas da celula do item
-				whichList[parentXval][parentYval] = naListaFechada;//adicione o item para a closedList
+				valorXPai = xAberta[listaAberta[1]];
+				valorYPai = yAberta[listaAberta[1]]; //Grave as coordenadas da celula do item
+				queLista[valorXPai][valorYPai] = naListaFechada;//adicione o item para a closedList
 
 				//listaAberta = Heap binária: Delete este item da listaAberta, que é mantido como uma heap binária. Para mais informações veja:
 				// http://www.policyalmanac.org/games/binaryHeaps.htm
@@ -139,9 +139,9 @@ public class AStar {
 					{
 						//Verifique se o custo de F do pai é maior do que cada filho.
 						//Selecione o menor dos dois filhos.
-						if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
+						if (custoF[listaAberta[u]] >= custoF[listaAberta[2*u]]) 
 							v = 2*u;
-						if (Fcost[listaAberta[v]] >= Fcost[listaAberta[2*u+1]]) 
+						if (custoF[listaAberta[v]] >= custoF[listaAberta[2*u+1]]) 
 							v = 2*u+1;		
 					}
 					else
@@ -149,7 +149,7 @@ public class AStar {
 						if (2*u <= numItemsListaAberta) //Se somente o filho 1 existe
 						{
 							//Verifique se o custo de F do pai é maior do que o filho 1.
-							if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
+							if (custoF[listaAberta[u]] >= custoF[listaAberta[2*u]]) 
 								v = 2*u;
 						}
 					}
@@ -170,72 +170,72 @@ public class AStar {
 				//conceitualmente, para a heap binaria mencionada a cima, mas não confuda eles. Eles são diferentes.
 				//O caminho dos filhos são descritos no Demo 1 com pontos cinzas a frente dos pais.) Adicione aqueles 
 				//quadrados dos filhos adjacens para a listaAberta para posterior consideração se apropriado. (ver vários blocos abaixo).
-				for (b = parentYval-1; b <= parentYval+1; b++){
-					for (a = parentXval-1; a <= parentXval+1; a++){
+				for (b = valorYPai-1; b <= valorYPai+1; b++){
+					for (a = valorXPai-1; a <= valorXPai+1; a++){
 
 						// Se não sair do mapa (faça isto primeiro para evitar erros de ArrayIndexOutOfBounds).
 						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
 
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
-							if (whichList[a][b] != naListaFechada) { 
+							if (queLista[a][b] != naListaFechada) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
 								if (espacoDeCaminhada [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
 									corner = caminhoPassavel;	
-									if (a == parentXval-1) 
+									if (a == valorXPai-1) 
 									{
-										if (b == parentYval-1)
+										if (b == valorYPai-1)
 										{
-											if (espacoDeCaminhada[parentXval-1][parentYval] == caminhoBloqueado || espacoDeCaminhada[parentXval][parentYval-1] == caminhoBloqueado)  corner = caminhoBloqueado;
+											if (espacoDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || espacoDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  corner = caminhoBloqueado;
 										}
-										else if (b == parentYval+1)
+										else if (b == valorYPai+1)
 										{
-											if (espacoDeCaminhada[parentXval][parentYval+1] == caminhoBloqueado
-													|| espacoDeCaminhada[parentXval-1][parentYval] == caminhoBloqueado) 
+											if (espacoDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado
+													|| espacoDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado) 
 												corner = caminhoBloqueado; 
 										}
 									}
-									else if (a == parentXval+1)
+									else if (a == valorXPai+1)
 									{
-										if (b == parentYval-1)
+										if (b == valorYPai-1)
 										{
-											if (espacoDeCaminhada[parentXval][parentYval-1] == caminhoBloqueado 
-													|| espacoDeCaminhada[parentXval+1][parentYval] == caminhoBloqueado) 
+											if (espacoDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado 
+													|| espacoDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado) 
 												corner = caminhoBloqueado;
 										}
-										else if (b == parentYval+1)
+										else if (b == valorYPai+1)
 										{
-											if (espacoDeCaminhada[parentXval+1][parentYval] == caminhoBloqueado 
-													|| espacoDeCaminhada[parentXval][parentYval+1] == caminhoBloqueado)
+											if (espacoDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado 
+													|| espacoDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado)
 												corner = caminhoBloqueado; 
 										}
 									}	
 									if (corner == caminhoPassavel) {
 
 										//		Se não já está na listaAberta, adicione este para a listaAberta.			
-										if (whichList[a][b] != naListaAberta) 
+										if (queLista[a][b] != naListaAberta) 
 										{	
 
 											//Cria um item novo na listaAberta na heap binaria.
 											novoIDItemListaAberta = novoIDItemListaAberta + 1; //Cada novo item tem um ID unico.
 											m = numItemsListaAberta+1;
 											listaAberta[m] = novoIDItemListaAberta;// Coloque o novo item da listaAberta(atualmente ID#) na base da heap.
-											openX[novoIDItemListaAberta] = a;
-											openY[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
+											xAberta[novoIDItemListaAberta] = a;
+											yAberta[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
 
 											//Calculando o custo de G
-											if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
-												addedGCost = 14;//custo de ir pelas diagonais dos quadrados;	
+											if (Math.abs(a-valorXPai) == 1 && Math.abs(b-valorYPai) == 1)
+												adicionadoCustoG = 14;//custo de ir pelas diagonais dos quadrados;	
 											else	
-												addedGCost = 10;//custo de ir em não diagonais.		
-											Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost;
+												adicionadoCustoG = 10;//custo de ir em não diagonais.		
+											custoG[a][b] = custoG[valorXPai][valorYPai] + adicionadoCustoG;
 
 											//Calcular os custos H e F e o pai
-											Hcost[listaAberta[m]] = AStar.tamanhoPixel*(Math.abs(a - targetX) + Math.abs(b - targetY));
-											Fcost[listaAberta[m]] = Gcost[a][b] + Hcost[listaAberta[m]];
-											parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
+											custoH[listaAberta[m]] = AStar.tamanhoPixel*(Math.abs(a - targetX) + Math.abs(b - targetY));
+											custoF[listaAberta[m]] = custoG[a][b] + custoH[listaAberta[m]];
+											xPai[a][b] = valorXPai ; yPai[a][b] = valorYPai;	
 
 											//Mover o novo item da listaAberta para o seu pŕoprio lugar na heap binária.
 											//Iniciando da base, sucessivamente comparar items pais, 
@@ -244,7 +244,7 @@ public class AStar {
 											while (m != 1) //Enquanto o item não tem sido borbulhado para o topo(m=1)	
 											{
 												//Verifique se o custo F do filho é < o custo F do pai. Se for, troque-os.
-												if (Fcost[listaAberta[m]] <= Fcost[listaAberta[m/2]])
+												if (custoF[listaAberta[m]] <= custoF[listaAberta[m/2]])
 												{
 													temp = listaAberta[m/2];
 													listaAberta[m/2] = listaAberta[m];
@@ -256,31 +256,31 @@ public class AStar {
 											}
 											numItemsListaAberta = numItemsListaAberta+1;//Adicione um para o número de items na heap
 
-											//Troque whichList para mostrar que o novo item está na listaAberta.
-											whichList[a][b] = naListaAberta;
+											//Troque queLista para mostrar que o novo item está na listaAberta.
+											queLista[a][b] = naListaAberta;
 										}
 
 										//8.If adjacent cell is already on the open list, check to see if this
 										//8. Se a célula adjacente já está na listaAberta, verifique para ver se este
 										//		caminho para a aquela célula da posição inicial, é um melhor.
 										//		Se for, troque o pai da célula e seus custos G e F.	
-										else //Se whichList(a,b) = naListaAberta
+										else //Se queLista(a,b) = naListaAberta
 										{
 
 											//Calcular o custo G deste possível caminho novo.
-											if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
-												addedGCost = 14;//Custo de ir pelas diagonais	
+											if (Math.abs(a-valorXPai) == 1 && Math.abs(b-valorYPai) == 1)
+												adicionadoCustoG = 14;//Custo de ir pelas diagonais	
 											else	
-												addedGCost = 10;//Custo de ir por não diagonais.				
-											tempGcost = Gcost[parentXval][parentYval] + addedGCost;
+												adicionadoCustoG = 10;//Custo de ir por não diagonais.				
+											custoGTemp = custoG[valorXPai][valorYPai] + adicionadoCustoG;
 
 											//Se este caminho é curto ( custo de G é baixo) então troque
 											//a célula pai, custo de G e custo de F.
-											if (tempGcost < Gcost[a][b]) //Se o custo de G é menor,
+											if (custoGTemp < custoG[a][b]) //Se o custo de G é menor,
 											{
-												parentX[a][b] = parentXval; //troque o quadrado pai
-												parentY[a][b] = parentYval;
-												Gcost[a][b] = tempGcost;//troque o custo de G			
+												xPai[a][b] = valorXPai; //troque o quadrado pai
+												yPai[a][b] = valorYPai;
+												custoG[a][b] = custoGTemp;//troque o custo de G			
 
 												//Porque trocando o custo de G também muda o custo de F, se 
 												//o item está na listaAberta nós precisamos alterar o custo F 
@@ -288,16 +288,16 @@ public class AStar {
 												//que nós mantemos uma listaAberta corretamente ordenada.
 												for (int x = 1; x <= numItemsListaAberta; x++) //olho para o item na listaAberta
 												{
-													if (openX[listaAberta[x]] == a && openY[listaAberta[x]] == b) //item encontrado
+													if (xAberta[listaAberta[x]] == a && yAberta[listaAberta[x]] == b) //item encontrado
 													{
-														Fcost[listaAberta[x]] = Gcost[a][b] + Hcost[listaAberta[x]];//troque o custo F
+														custoF[listaAberta[x]] = custoG[a][b] + custoH[listaAberta[x]];//troque o custo F
 
 														//Veja se alterando o bubbles score de F do item a cima da sua localização corrente na heap.
 														m = x;
 														while (m != 1) //Enquanto o item não foi borbulhado para o topo (m = 1).	
 														{
 															//Verifique se o filho é < pai. Se for, troque-os.
-															if (Fcost[listaAberta[m]] < Fcost[listaAberta[m/2]])
+															if (custoF[listaAberta[m]] < custoF[listaAberta[m/2]])
 															{
 																temp = listaAberta[m/2];
 																listaAberta[m/2] = listaAberta[m];
@@ -308,17 +308,17 @@ public class AStar {
 																break;
 														} 
 														break; //saia para x = loop
-													} //Se openX(listaAberta(x)) = a
+													} //Se xAberta(listaAberta(x)) = a
 												} //For x = 1 To numItemsListaAberta
-											}//If tempGcost < Gcost(a,b)
+											}//If custoGTemp < custoG(a,b)
 
-										}//else If whichList(a,b) = naListaAberta	
+										}//else If queLista(a,b) = naListaAberta	
 									}//If não cortando um canto
 								}//If não um quadrado parede.
 							}//If não já está na closedList 
 						}//If não está fora do mapa.
-					}//for (a = parentXval-1; a <= parentXval+1; a++){
-				}//for (b = parentYval-1; b <= parentYval+1; b++){
+					}//for (a = valorXPai-1; a <= valorXPai+1; a++){
+				}//for (b = valorYPai-1; b <= valorYPai+1; b++){
 
 			}//if (numItemsListaAberta != 0)
 
@@ -329,7 +329,7 @@ public class AStar {
 			}  
 
 			//Se o alvo é adicionado a listaAberta, então o caminho foi encontrado.
-			if (whichList[targetX][targetY] == naListaAberta)
+			if (queLista[targetX][targetY] == naListaAberta)
 			{
 				path = encontrado; break;
 			}
@@ -347,18 +347,18 @@ public class AStar {
 			do
 			{
 				//Visitar o pai da célula corrente.
-				tempx = parentX[pathX][pathY];		
-				pathY = parentY[pathX][pathY];
+				tempx = xPai[pathX][pathY];		
+				pathY = yPai[pathX][pathY];
 				pathX = tempx;
 
 				//Calcular o tamanho do caminho.
-				pathLength[pathfinderID] = pathLength[pathfinderID] + 1;
+				tamanhoDoCaminho[pathfinderID] = tamanhoDoCaminho[pathfinderID] + 1;
 			}
 			while (pathX != startX || pathY != startY);
 
 			//b.Redimensione o dataBank para o correto tamanho em bytes.
-			Integer[] arr = pathBank2.get(pathfinderID);
-			pathBank2.set(pathfinderID, Arrays.copyOf(arr, pathLength[pathfinderID]*8));
+			Integer[] arr = arquivaCaminho2.get(pathfinderID);
+			arquivaCaminho2.set(pathfinderID, Arrays.copyOf(arr, tamanhoDoCaminho[pathfinderID]*8));
 
 			//c. Agora copie as informações do caminho sobre o databank. Desde que 
 			//		nós estamos trabahando atrás do alvo para da posição inicial, nós
@@ -366,23 +366,23 @@ public class AStar {
 			//		um conjunto corretamente ordenado de dados do caminho, para o primeiro passo
 			//		até o último.
 			pathX = targetX ; pathY = targetY;
-			cellPosition = pathLength[pathfinderID]*2;//Inicie do final	
+			cellPosition = tamanhoDoCaminho[pathfinderID]*2;//Inicie do final	
 			do
 			{
 				cellPosition = cellPosition - 2;//trabalhe 2 inteiros para trás
-				pathBank2.get(pathfinderID)[cellPosition] = pathX;
-				pathBank2.get(pathfinderID)[cellPosition+1] = pathY;
+				arquivaCaminho2.get(pathfinderID)[cellPosition] = pathX;
+				arquivaCaminho2.get(pathfinderID)[cellPosition+1] = pathY;
 	
 				//d. Visite o pai da célula atual.
-				tempx = parentX[pathX][pathY];		
-				pathY = parentY[pathX][pathY];
+				tempx = xPai[pathX][pathY];		
+				pathY = yPai[pathX][pathY];
 				pathX = tempx;
 
 				//e. Se nós temos encontrado o quadrado incial, saia do loop.
 			}
 			while (pathX != startX || pathY != startY);	
 
-			//11. Leia o primeiro passo dentro dos arrays xPath/yPath. 
+			//11. Leia o primeiro passo dentro dos arrays caminhoX/caminhoY. 
 			ReadPath(pathfinderID,startingX,startingY,1);
 
 		}
@@ -393,46 +393,46 @@ public class AStar {
 	{
 		int ID = pathfinderID; //redundante, mas faz que o seguinte seja mais fácil para ler.
 		//Se um caminho tem sido encontrado para o pathfinder ...
-		if (pathStatus[ID] == encontrado)
+		if (statusDoCaminho[ID] == encontrado)
 		{
 
 			//Se path finder está apenas iniciando um novo vaminho ou tenha alcançado o
 			//centro do caminho atual ( e o final do caminho não tenha sido encontrado), visite o próximo quadrado do caminho.
-			if (pathLocation[ID] < pathLength[ID])
+			if (localizacaoDoCaminho[ID] < tamanhoDoCaminho[ID])
 			{
 				//Se apenas começando ou se está fechado para o centro do quadrado
-				if (pathLocation[ID] == 0 || 
-						(Math.abs(currentX - xPath[ID]) < pixelsPerFrame && Math.abs(currentY - yPath[ID]) < pixelsPerFrame))
-					pathLocation[ID] = pathLocation[ID] + 1;
+				if (localizacaoDoCaminho[ID] == 0 || 
+						(Math.abs(currentX - caminhoX[ID]) < pixelsPerFrame && Math.abs(currentY - caminhoY[ID]) < pixelsPerFrame))
+					localizacaoDoCaminho[ID] = localizacaoDoCaminho[ID] + 1;
 			}
 
 			//Leia o dado do caminho.
-			xPath[ID] = ReadPathX(ID,pathLocation[ID]);
-			yPath[ID] = ReadPathY(ID,pathLocation[ID]);
+			caminhoX[ID] = ReadPathX(ID,localizacaoDoCaminho[ID]);
+			caminhoY[ID] = ReadPathY(ID,localizacaoDoCaminho[ID]);
 
 			//Se o centro do último quadrado caminho no caminho tem sido alcançado resete-o.
-			if (pathLocation[ID] == pathLength[ID]) 
+			if (localizacaoDoCaminho[ID] == tamanhoDoCaminho[ID]) 
 			{
-				if (Math.abs(currentX - xPath[ID]) < pixelsPerFrame 
-						&& Math.abs(currentY - yPath[ID]) < pixelsPerFrame) //Se perto o suficiente do quadrado do centro
-					pathStatus[ID] = naoComecou; 
+				if (Math.abs(currentX - caminhoX[ID]) < pixelsPerFrame 
+						&& Math.abs(currentY - caminhoY[ID]) < pixelsPerFrame) //Se perto o suficiente do quadrado do centro
+					statusDoCaminho[ID] = naoComecou; 
 			}
 		}
 
 		//Se não tem caminho para este pathfinder, simplismente fique na posição inicial.
 		else
 		{	
-			xPath[ID] = currentX;
-			yPath[ID] = currentY;
+			caminhoX[ID] = currentX;
+			caminhoY[ID] = currentY;
 		}
 	}
 
-	//The following two functions read the raw path data from the pathBank.
+	//The following two functions read the raw path data from the arquivaCaminho.
 	//You can call these functions directly and skip the readPath function
-	//above if you want. Make sure you know what your current pathLocation
+	//above if you want. Make sure you know what your current localizacaoDoCaminho
 	//is.
 	
-	//As seguintes duas funções leem um raw path data do path pathBank.
+	//As seguintes duas funções leem um raw path data do path arquivaCaminho.
 	//Você pode chamar estas funções diretamente e pular a função readPath
 	// a cima se você quiser. Tenha certeza que você sabe qual é a sua posição
 	//atual.
@@ -441,14 +441,14 @@ public class AStar {
 	// Name: ReadPathX
 	// Desc: Le a coordenada x do próximo passo do caminho
 	//-----------------------------------------------------------------------------
-	int ReadPathX(int pathfinderID,int pathLocation)
+	int ReadPathX(int pathfinderID,int localizacaoDoCaminho)
 	{
 		int x = 0;
-		if (pathLocation <= pathLength[pathfinderID])
+		if (localizacaoDoCaminho <= tamanhoDoCaminho[pathfinderID])
 		{
 
-			//Le a coordenada X do pathPathBank
-			x = pathBank2.get(pathfinderID)[pathLocation*2-2];
+			//Le a coordenada X do patharquivaCaminho
+			x = arquivaCaminho2.get(pathfinderID)[localizacaoDoCaminho*2-2];
 
 			//Ajusta a coordenada para ela ficar alinhada ao inicio do quadrado. 
 			//Assumindo que estamos usando sprites que não são centralizados..
@@ -464,15 +464,15 @@ public class AStar {
 	// Name: ReadPathY
 	// Desc: Le a coordenada y do próximo passo do caminho
 	//-----------------------------------------------------------------------------
-	int ReadPathY(int pathfinderID,int pathLocation)
+	int ReadPathY(int pathfinderID,int localizacaoDoCaminho)
 	{
 		int y = 0;
-		if (pathLocation <= pathLength[pathfinderID])
+		if (localizacaoDoCaminho <= tamanhoDoCaminho[pathfinderID])
 		{
 
-			//Le as coordenadas do pathBank.
-			//		y = pathBank[pathfinderID].get(pathLocation*2-1);
-			y = pathBank2.get(pathfinderID)[pathLocation*2-1];
+			//Le as coordenadas do arquivaCaminho.
+			//		y = arquivaCaminho[pathfinderID].get(localizacaoDoCaminho*2-1);
+			y = arquivaCaminho2.get(pathfinderID)[localizacaoDoCaminho*2-1];
 
 			//Ajusta a coordenada para ela ficar alinhada ao inicio do quadrado. 
 			//Assumindo que estamos usando sprites que não são centralizados..
@@ -482,10 +482,10 @@ public class AStar {
 		return y;
 	}
 	
-	public int FindPathBuscaCega (int pathfinderID, int startingX, int startingY,
+	public int encontrarCaminhoBuscaCega (int pathfinderID, int startingX, int startingY,
 			int targetX, int targetY)
 	{
-		int naListaAberta=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
+		int naListaAberta=0, valorXPai=0, valorYPai=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, adicionadoCustoG=0, custoGTemp = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
 
 		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de espacoDeCaminhada.
 		int startX = startingX/tamanhoPixel;
@@ -496,40 +496,40 @@ public class AStar {
 		//2. Caminhos rápidos: Sobre certas circunstâncias, nenhum caminho é necessário.
 
 		// Se a posição inicial e o destino estão na mesmo lugar
-		if (startX == targetX && startY == targetY && pathLocation[pathfinderID] > 0)
+		if (startX == targetX && startY == targetY && localizacaoDoCaminho[pathfinderID] > 0)
 			return encontrado;
-		if (startX == targetX && startY == targetY && pathLocation[pathfinderID] == 0)
+		if (startX == targetX && startY == targetY && localizacaoDoCaminho[pathfinderID] == 0)
 			return naoExiste;
 
 		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
 		if (espacoDeCaminhada[targetX][targetY] == caminhoBloqueado)
 		{
-			xPath[pathfinderID] = startingX;
-			yPath[pathfinderID] = startingY;
+			caminhoX[pathfinderID] = startingX;
+			caminhoY[pathfinderID] = startingY;
 			return naoExiste;
 		}
 
 		//3. Resetando algumas variáveis que precisam ser limpas
-		if (naListaFechada > 1000000) //Resetando whichList ocasionalmente
+		if (naListaFechada > 1000000) //Resetando queLista ocasionalmente
 		{
 			for (int x = 0; x < larguraTela; x++) {
 				for (int y = 0; y < alturaTela; y++)
-					whichList [x][y] = 0;
+					queLista [x][y] = 0;
 			}
 			naListaFechada = 10;	
 		}
-		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list é mais rapida do que redimming whichList() array;
+		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list é mais rapida do que redimming queLista() array;
 		naListaAberta = naListaFechada-1;
-		pathLength [pathfinderID] = naoComecou;//i.e, = 0
-		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
-		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
+		tamanhoDoCaminho [pathfinderID] = naoComecou;//i.e, = 0
+		localizacaoDoCaminho [pathfinderID] = naoComecou;//i.e, = 0
+		custoG[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posição inicial listaAberta de quadrados para serem verificados.
 		numItemsListaAberta = 1;
 		listaAberta[1] = 1;		//colocando este como o item do topo(e atualmente somente) da listaAberta, que é mantida como uma heap binaria.
 
-		openX[1] = startX;
-		openY[1] = startY;
+		xAberta[1] = startX;
+		yAberta[1] = startY;
 
 		//5. Faça o seguinte até que um caminho é encontrador ou ele não exista.
 		do
@@ -541,9 +541,9 @@ public class AStar {
 			{
 
 				//7. Remova o primeiro item da listaAberta.
-				parentXval = openX[listaAberta[1]];
-				parentYval = openY[listaAberta[1]]; //Grave as coordenadas da celula do item
-				whichList[parentXval][parentYval] = naListaFechada;//adicione o item para a closedList
+				valorXPai = xAberta[listaAberta[1]];
+				valorYPai = yAberta[listaAberta[1]]; //Grave as coordenadas da celula do item
+				queLista[valorXPai][valorYPai] = naListaFechada;//adicione o item para a closedList
 
 				//listaAberta = Heap binária: Delete este item da listaAberta, que é mantido como uma heap binária. Para mais informações veja:
 				// http://www.policyalmanac.org/games/binaryHeaps.htm
@@ -561,9 +561,9 @@ public class AStar {
 					{
 						//Verifique se o custo de F do pai é maior do que cada filho.
 						//Selecione o menor dos dois filhos.
-						if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
+						if (custoF[listaAberta[u]] >= custoF[listaAberta[2*u]]) 
 							v = 2*u;
-						if (Fcost[listaAberta[v]] >= Fcost[listaAberta[2*u+1]]) 
+						if (custoF[listaAberta[v]] >= custoF[listaAberta[2*u+1]]) 
 							v = 2*u+1;		
 					}
 					else
@@ -571,7 +571,7 @@ public class AStar {
 						if (2*u <= numItemsListaAberta) //Se somente o filho 1 existe
 						{
 							//Verifique se o custo de F do pai é maior do que o filho 1.
-							if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
+							if (custoF[listaAberta[u]] >= custoF[listaAberta[2*u]]) 
 								v = 2*u;
 						}
 					}
@@ -592,72 +592,72 @@ public class AStar {
 				//conceitualmente, para a heap binaria mencionada a cima, mas não confuda eles. Eles são diferentes.
 				//O caminho dos filhos são descritos no Demo 1 com pontos cinzas a frente dos pais.) Adicione aqueles 
 				//quadrados dos filhos adjacens para a listaAberta para posterior consideração se apropriado. (ver vários blocos abaixo).
-				for (b = parentYval-1; b <= parentYval+1; b++){
-					for (a = parentXval-1; a <= parentXval+1; a++){
+				for (b = valorYPai-1; b <= valorYPai+1; b++){
+					for (a = valorXPai-1; a <= valorXPai+1; a++){
 
 						// Se não sair do mapa (faça isto primeiro para evitar erros de ArrayIndexOutOfBounds).
 						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
 
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
-							if (whichList[a][b] != naListaFechada) { 
+							if (queLista[a][b] != naListaFechada) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
 								if (espacoDeCaminhada [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
 									corner = caminhoPassavel;	
-									if (a == parentXval-1) 
+									if (a == valorXPai-1) 
 									{
-										if (b == parentYval-1)
+										if (b == valorYPai-1)
 										{
-											if (espacoDeCaminhada[parentXval-1][parentYval] == caminhoBloqueado || espacoDeCaminhada[parentXval][parentYval-1] == caminhoBloqueado)  corner = caminhoBloqueado;
+											if (espacoDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || espacoDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  corner = caminhoBloqueado;
 										}
-										else if (b == parentYval+1)
+										else if (b == valorYPai+1)
 										{
-											if (espacoDeCaminhada[parentXval][parentYval+1] == caminhoBloqueado
-													|| espacoDeCaminhada[parentXval-1][parentYval] == caminhoBloqueado) 
+											if (espacoDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado
+													|| espacoDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado) 
 												corner = caminhoBloqueado; 
 										}
 									}
-									else if (a == parentXval+1)
+									else if (a == valorXPai+1)
 									{
-										if (b == parentYval-1)
+										if (b == valorYPai-1)
 										{
-											if (espacoDeCaminhada[parentXval][parentYval-1] == caminhoBloqueado 
-													|| espacoDeCaminhada[parentXval+1][parentYval] == caminhoBloqueado) 
+											if (espacoDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado 
+													|| espacoDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado) 
 												corner = caminhoBloqueado;
 										}
-										else if (b == parentYval+1)
+										else if (b == valorYPai+1)
 										{
-											if (espacoDeCaminhada[parentXval+1][parentYval] == caminhoBloqueado 
-													|| espacoDeCaminhada[parentXval][parentYval+1] == caminhoBloqueado)
+											if (espacoDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado 
+													|| espacoDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado)
 												corner = caminhoBloqueado; 
 										}
 									}	
 									if (corner == caminhoPassavel) {
 
 										//		Se não já está na listaAberta, adicione este para a listaAberta.			
-										if (whichList[a][b] != naListaAberta) 
+										if (queLista[a][b] != naListaAberta) 
 										{	
 
 											//Cria um item novo na listaAberta na heap binaria.
 											novoIDItemListaAberta = novoIDItemListaAberta + 1; //Cada novo item tem um ID unico.
 											m = numItemsListaAberta+1;
 											listaAberta[m] = novoIDItemListaAberta;// Coloque o novo item da listaAberta(atualmente ID#) na base da heap.
-											openX[novoIDItemListaAberta] = a;
-											openY[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
+											xAberta[novoIDItemListaAberta] = a;
+											yAberta[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
 
 											//Calculando o custo de G
-											if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
-												addedGCost = 14;//custo de ir pelas diagonais dos quadrados;	
+											if (Math.abs(a-valorXPai) == 1 && Math.abs(b-valorYPai) == 1)
+												adicionadoCustoG = 14;//custo de ir pelas diagonais dos quadrados;	
 											else	
-												addedGCost = 10;//custo de ir em não diagonais.		
-											Gcost[a][b] = 1;
+												adicionadoCustoG = 10;//custo de ir em não diagonais.		
+											custoG[a][b] = 1;
 
 											//Calcular os custos H e F e o pai
-											Hcost[listaAberta[m]] = 1;
-											Fcost[listaAberta[m]] = Gcost[a][b] + Hcost[listaAberta[m]];
-											parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
+											custoH[listaAberta[m]] = 1;
+											custoF[listaAberta[m]] = custoG[a][b] + custoH[listaAberta[m]];
+											xPai[a][b] = valorXPai ; yPai[a][b] = valorYPai;	
 
 											//Mover o novo item da listaAberta para o seu pŕoprio lugar na heap binária.
 											//Iniciando da base, sucessivamente comparar items pais, 
@@ -666,7 +666,7 @@ public class AStar {
 											while (m != 1) //Enquanto o item não tem sido borbulhado para o topo(m=1)	
 											{
 												//Verifique se o custo F do filho é < o custo F do pai. Se for, troque-os.
-												if (Fcost[listaAberta[m]] <= Fcost[listaAberta[m/2]])
+												if (custoF[listaAberta[m]] <= custoF[listaAberta[m/2]])
 												{
 													temp = listaAberta[m/2];
 													listaAberta[m/2] = listaAberta[m];
@@ -678,31 +678,31 @@ public class AStar {
 											}
 											numItemsListaAberta = numItemsListaAberta+1;//Adicione um para o número de items na heap
 
-											//Troque whichList para mostrar que o novo item está na listaAberta.
-											whichList[a][b] = naListaAberta;
+											//Troque queLista para mostrar que o novo item está na listaAberta.
+											queLista[a][b] = naListaAberta;
 										}
 
 										//8.If adjacent cell is already on the open list, check to see if this
 										//8. Se a célula adjacente já está na listaAberta, verifique para ver se este
 										//		caminho para a aquela célula da posição inicial, é um melhor.
 										//		Se for, troque o pai da célula e seus custos G e F.	
-										else //Se whichList(a,b) = naListaAberta
+										else //Se queLista(a,b) = naListaAberta
 										{
 
 											//Calcular o custo G deste possível caminho novo.
-											if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
-												addedGCost = 14;//Custo de ir pelas diagonais	
+											if (Math.abs(a-valorXPai) == 1 && Math.abs(b-valorYPai) == 1)
+												adicionadoCustoG = 14;//Custo de ir pelas diagonais	
 											else	
-												addedGCost = 10;//Custo de ir por não diagonais.				
-											tempGcost = Gcost[parentXval][parentYval];
+												adicionadoCustoG = 10;//Custo de ir por não diagonais.				
+											custoGTemp = custoG[valorXPai][valorYPai];
 
 											//Se este caminho é curto ( custo de G é baixo) então troque
 											//a célula pai, custo de G e custo de F.
-											if (tempGcost < Gcost[a][b]) //Se o custo de G é menor,
+											if (custoGTemp < custoG[a][b]) //Se o custo de G é menor,
 											{
-												parentX[a][b] = parentXval; //troque o quadrado pai
-												parentY[a][b] = parentYval;
-												Gcost[a][b] = tempGcost;//troque o custo de G			
+												xPai[a][b] = valorXPai; //troque o quadrado pai
+												yPai[a][b] = valorYPai;
+												custoG[a][b] = custoGTemp;//troque o custo de G			
 
 												//Porque trocando o custo de G também muda o custo de F, se 
 												//o item está na listaAberta nós precisamos alterar o custo F 
@@ -710,16 +710,16 @@ public class AStar {
 												//que nós mantemos uma listaAberta corretamente ordenada.
 												for (int x = 1; x <= numItemsListaAberta; x++) //olho para o item na listaAberta
 												{
-													if (openX[listaAberta[x]] == a && openY[listaAberta[x]] == b) //item encontrado
+													if (xAberta[listaAberta[x]] == a && yAberta[listaAberta[x]] == b) //item encontrado
 													{
-														Fcost[listaAberta[x]] = Gcost[a][b] + Hcost[listaAberta[x]];//troque o custo F
+														custoF[listaAberta[x]] = custoG[a][b] + custoH[listaAberta[x]];//troque o custo F
 
 														//Veja se alterando o bubbles score de F do item a cima da sua localização corrente na heap.
 														m = x;
 														while (m != 1) //Enquanto o item não foi borbulhado para o topo (m = 1).	
 														{
 															//Verifique se o filho é < pai. Se for, troque-os.
-															if (Fcost[listaAberta[m]] < Fcost[listaAberta[m/2]])
+															if (custoF[listaAberta[m]] < custoF[listaAberta[m/2]])
 															{
 																temp = listaAberta[m/2];
 																listaAberta[m/2] = listaAberta[m];
@@ -730,17 +730,17 @@ public class AStar {
 																break;
 														} 
 														break; //saia para x = loop
-													} //Se openX(listaAberta(x)) = a
+													} //Se xAberta(listaAberta(x)) = a
 												} //For x = 1 To numItemsListaAberta
-											}//If tempGcost < Gcost(a,b)
+											}//If custoGTemp < custoG(a,b)
 
-										}//else If whichList(a,b) = naListaAberta	
+										}//else If queLista(a,b) = naListaAberta	
 									}//If não cortando um canto
 								}//If não um quadrado parede.
 							}//If não já está na closedList 
 						}//If não está fora do mapa.
-					}//for (a = parentXval-1; a <= parentXval+1; a++){
-				}//for (b = parentYval-1; b <= parentYval+1; b++){
+					}//for (a = valorXPai-1; a <= valorXPai+1; a++){
+				}//for (b = valorYPai-1; b <= valorYPai+1; b++){
 
 			}//if (numItemsListaAberta != 0)
 
@@ -751,7 +751,7 @@ public class AStar {
 			}  
 
 			//Se o alvo é adicionado a listaAberta, então o caminho foi encontrado.
-			if (whichList[targetX][targetY] == naListaAberta)
+			if (queLista[targetX][targetY] == naListaAberta)
 			{
 				path = encontrado; break;
 			}
@@ -769,18 +769,18 @@ public class AStar {
 			do
 			{
 				//Visitar o pai da célula corrente.
-				tempx = parentX[pathX][pathY];		
-				pathY = parentY[pathX][pathY];
+				tempx = xPai[pathX][pathY];		
+				pathY = yPai[pathX][pathY];
 				pathX = tempx;
 
 				//Calcular o tamanho do caminho.
-				pathLength[pathfinderID] = pathLength[pathfinderID] + 1;
+				tamanhoDoCaminho[pathfinderID] = tamanhoDoCaminho[pathfinderID] + 1;
 			}
 			while (pathX != startX || pathY != startY);
 
 			//b.Redimensione o dataBank para o correto tamanho em bytes.
-			Integer[] arr = pathBank2.get(pathfinderID);
-			pathBank2.set(pathfinderID, Arrays.copyOf(arr, pathLength[pathfinderID]*8));
+			Integer[] arr = arquivaCaminho2.get(pathfinderID);
+			arquivaCaminho2.set(pathfinderID, Arrays.copyOf(arr, tamanhoDoCaminho[pathfinderID]*8));
 
 			//c. Agora copie as informações do caminho sobre o databank. Desde que 
 			//		nós estamos trabahando atrás do alvo para da posição inicial, nós
@@ -788,23 +788,23 @@ public class AStar {
 			//		um conjunto corretamente ordenado de dados do caminho, para o primeiro passo
 			//		até o último.
 			pathX = targetX ; pathY = targetY;
-			cellPosition = pathLength[pathfinderID]*2;//Inicie do final	
+			cellPosition = tamanhoDoCaminho[pathfinderID]*2;//Inicie do final	
 			do
 			{
 				cellPosition = cellPosition - 2;//trabalhe 2 inteiros para trás
-				pathBank2.get(pathfinderID)[cellPosition] = pathX;
-				pathBank2.get(pathfinderID)[cellPosition+1] = pathY;
+				arquivaCaminho2.get(pathfinderID)[cellPosition] = pathX;
+				arquivaCaminho2.get(pathfinderID)[cellPosition+1] = pathY;
 	
 				//d. Visite o pai da célula atual.
-				tempx = parentX[pathX][pathY];		
-				pathY = parentY[pathX][pathY];
+				tempx = xPai[pathX][pathY];		
+				pathY = yPai[pathX][pathY];
 				pathX = tempx;
 
 				//e. Se nós temos encontrado o quadrado incial, saia do loop.
 			}
 			while (pathX != startX || pathY != startY);	
 
-			//11. Leia o primeiro passo dentro dos arrays xPath/yPath. 
+			//11. Leia o primeiro passo dentro dos arrays caminhoX/caminhoY. 
 			ReadPath(pathfinderID,startingX,startingY,1);
 
 		}

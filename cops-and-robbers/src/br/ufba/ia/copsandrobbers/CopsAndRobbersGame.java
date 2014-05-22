@@ -60,7 +60,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		LoadMapData();
 		LoadUnitData();
 		LoadGraphics();
-		aStar.InitializePathfinder();
+		aStar.inicializarBuscadorDeCaminho();
 	}
 
 	@Override
@@ -251,7 +251,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 	//-----------------------------------------------------------------------------
 	// Name: MoveChaser
 	// Desc: This subroutine moves the chasers/ghosts around on the screen.
-	//		In this case the findPath function is accessed automatically when
+	//		In this case the encontrarCaminho function is accessed automatically when
 	//		a chaser reaches the end of his current path. The path info
 	//		is also updated occasionally.
 	//-----------------------------------------------------------------------------
@@ -264,22 +264,22 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		{
 		//If no path has been generated, generate one. Update it when
 		//the chaser reaches its fifth step on the current path.	
-		if (aStar.pathStatus[ID] == AStar.naoComecou|| aStar.pathLocation[ID] == 10)
+		if (aStar.statusDoCaminho[ID] == AStar.naoComecou|| aStar.localizacaoDoCaminho[ID] == 10)
 		{
 			//Generate a new path. Enter coordinates of smiley sprite (xLoc(1)/
 			//yLoc(1)) as the target.
 			if(ID == 2){
-				aStar.pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],
+				aStar.statusDoCaminho[ID] = aStar.encontrarCaminho(ID,xLoc[ID],yLoc[ID],
 						xLoc[targetID],yLoc[targetID]);
 			}else{
-				aStar.pathStatus[ID] = aStar.FindPathBuscaCega(ID,xLoc[ID],yLoc[ID],
+				aStar.statusDoCaminho[ID] = aStar.encontrarCaminhoBuscaCega(ID,xLoc[ID],yLoc[ID],
 					xLoc[targetID],yLoc[targetID]);
 			}
 			
 		}} 
 
 	//2.Move chaser.
-		if (aStar.pathStatus[ID] == AStar.encontrado) MoveSprite(ID);
+		if (aStar.statusDoCaminho[ID] == AStar.encontrado) MoveSprite(ID);
 	}
 	
 	void MoveSmiley(){
@@ -293,39 +293,39 @@ public class CopsAndRobbersGame implements ApplicationListener {
 				touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 				camera.unproject(touchPos);
 				
-				//Call the findPath function.
+				//Call the encontrarCaminho function.
 				long time1 = TimeUtils.millis();
-				aStar.pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],(int)touchPos.x,(int)touchPos.y);
+				aStar.statusDoCaminho[ID] = aStar.encontrarCaminho(ID,xLoc[ID],yLoc[ID],(int)touchPos.x,(int)touchPos.y);
 				long time2 = TimeUtils.millis();
 				searchTime = time2-time1;
 			}
 
 		//2.Move smiley.
-			if (aStar.pathStatus[ID] == AStar.encontrado) MoveSprite(ID);
+			if (aStar.statusDoCaminho[ID] == AStar.encontrado) MoveSprite(ID);
 	}
 	
 	void MoveSprite(int ID){
 		//1.Read path information
 		aStar.ReadPath(ID,xLoc[ID],yLoc[ID],speed[ID]);
 
-	//2.Move sprite. xLoc/yLoc = current location of sprite. xPath and
-//		yPath = coordinates of next step on the path that were/are
+	//2.Move sprite. xLoc/yLoc = current location of sprite. caminhoX and
+//		caminhoY = coordinates of next step on the path that were/are
 //		read using the readPath function.
-		if (xLoc[ID] > aStar.xPath[ID]) xLoc[ID] = xLoc[ID] - speed[ID];
-		if (xLoc[ID] < aStar.xPath[ID]) xLoc[ID] = xLoc[ID] + speed[ID];
-		if (yLoc[ID] > aStar.yPath[ID]) yLoc[ID] = yLoc[ID] - speed[ID];		
-		if (yLoc[ID] < aStar.yPath[ID]) yLoc[ID] = yLoc[ID] + speed[ID];
+		if (xLoc[ID] > aStar.caminhoX[ID]) xLoc[ID] = xLoc[ID] - speed[ID];
+		if (xLoc[ID] < aStar.caminhoX[ID]) xLoc[ID] = xLoc[ID] + speed[ID];
+		if (yLoc[ID] > aStar.caminhoY[ID]) yLoc[ID] = yLoc[ID] - speed[ID];		
+		if (yLoc[ID] < aStar.caminhoY[ID]) yLoc[ID] = yLoc[ID] + speed[ID];
 		
 	//3.When sprite reaches the end location square	(end of its current
 //		path) ...		
-		if (aStar.pathLocation[ID] == aStar.pathLength[ID]) 
+		if (aStar.localizacaoDoCaminho[ID] == aStar.tamanhoDoCaminho[ID]) 
 		{
 //			Center the chaser in the square (not really necessary, but 
 //			it looks a little better for the chaser, which moves in 3 pixel
 //			increments and thus isn't always centered when it reaches its
 //			target).
-			if (Math.abs(xLoc[ID] - aStar.xPath[ID]) < speed[ID]) xLoc[ID] = aStar.xPath[ID];
-			if (Math.abs(yLoc[ID] - aStar.yPath[ID]) < speed[ID]) yLoc[ID] = aStar.yPath[ID];
+			if (Math.abs(xLoc[ID] - aStar.caminhoX[ID]) < speed[ID]) xLoc[ID] = aStar.caminhoX[ID];
+			if (Math.abs(yLoc[ID] - aStar.caminhoY[ID]) < speed[ID]) yLoc[ID] = aStar.caminhoY[ID];
 		}
 	}
 	
