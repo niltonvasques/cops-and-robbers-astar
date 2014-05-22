@@ -11,6 +11,6 @@ public class Main {
 		cfg.width = 800;
 		cfg.height = 600;
 		
-		new LwjglApplication(new CopsAndRobbersGame(), cfg);
+		new LwjglApplication(new PoliciaLadraoGame(), cfg);
 	}
 }

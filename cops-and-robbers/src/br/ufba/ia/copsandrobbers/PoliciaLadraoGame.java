@@ -23,7 +23,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
 
-public class CopsAndRobbersGame implements ApplicationListener {
+public class PoliciaLadraoGame implements ApplicationListener {
 
 	private AStar aStar = new AStar();
 
@@ -33,16 +33,12 @@ public class CopsAndRobbersGame implements ApplicationListener {
 	private Sprite sprite;
 
 	private TextureAtlas atlas;
-	private TextureRegion wallImage, mapImage;
-	private TextureRegion smiley, chaser;
+	private TextureRegion paredeImage, mapImage;
+	private TextureRegion ladraoRegion, policiaRegion;
 
-	//-----------------------------------------------------------------------------
-	// Global variables and constants
-	//-----------------------------------------------------------------------------
-
-	private int smileyActivated = 1;
+	private int ladraoAtivado = 1;
 	private int xLoc[] = new int[4], yLoc[] = new int[4], speed[] = new int[4];
-	private long searchTime, g_showDirections=0; 
+	private long tempoBusca; 
 
 
 	@Override
@@ -57,9 +53,9 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		batch = new SpriteBatch();
 		batch.setProjectionMatrix(camera.combined);
 
-		LoadMapData();
-		LoadUnitData();
-		LoadGraphics();
+		carregarMapa();
+		carregarUnidades();
+		carregarGraficos();
 		aStar.inicializarBuscadorDeCaminho();
 	}
 
@@ -67,34 +63,23 @@ public class CopsAndRobbersGame implements ApplicationListener {
 	public void dispose() {
 		batch.dispose();
 		atlas.dispose();
-		SaveMapData();
+		salvarMapa();
 
-		//		EndPathfinder();
-		//		EndGraphics();
 	}
 
-	//-----------------------------------------------------------------------------
-	// Name: GameMain
-	// Desc: Launch and run game.
-	//-----------------------------------------------------------------------------
-	//Main game loop
 	@Override
 	public void render() {		
 
 
-		//	    while (!KeyDown(27)) //While escape key not pressed
 		if(Gdx.input.isKeyPressed(Keys.ESCAPE)) Gdx.app.exit();
-		CheckUserInput();
-		//Move smiley
-		if (smileyActivated == 1) MoveSmiley();
-		//	
-		//Move chasers
-		if (smileyActivated == 1)  
+		verificarInputs();
+		if (ladraoAtivado == 1) moveLadrao();
+		if (ladraoAtivado == 1)  
 			for (int ID = 2; ID <= 3; ID++) 
-				MoveChaser(ID);
+				movePolicia(ID);
 
 
-		RenderScreen(); //draw stuff on screen
+		RenderScreen(); 
 
 	}
 
@@ -112,40 +97,22 @@ public class CopsAndRobbersGame implements ApplicationListener {
 
 
 
-	//-----------------------------------------------------------------------------
-	// Function Prototypes: where necessary
-	//-----------------------------------------------------------------------------
-
-
-	//-----------------------------------------------------------------------------
-	// Name: CheckUserInput
-	// Desc: Process key and mouse presses.
-	//-----------------------------------------------------------------------------
-	private void CheckUserInput (){
+	private void verificarInputs (){
 		if (Gdx.input.isKeyPressed(Keys.ENTER))
 		{
-			smileyActivated = 1 - smileyActivated;
-			if (smileyActivated == 1) CreateMapImage();
+			ladraoAtivado = 1 - ladraoAtivado;
+			if (ladraoAtivado == 1) criarMapaImagem();
 		}
-		if (smileyActivated == 0) EditMap();
-
-		//Show/hide directions by pressing space bar.
-		if (Gdx.input.isKeyPressed(Keys.SPACE)) g_showDirections = 1-g_showDirections;
+//		if (ladraoAtivado == 0) editarMapa();
 	}
 
-	//-----------------------------------------------------------------------------
-	// Name: CreateMapImage
-	// Desc: Creates the map image
-	//-----------------------------------------------------------------------------
-	void CreateMapImage(){
+	void criarMapaImagem(){
 		Pixmap pixmap = new Pixmap(1024, 1024, Format.RGB888);
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
 		pixmap.setColor(Color.GRAY);
-		//		Color(0,0,255);//set default color to blue
 		for (int x = 0; x <= 79; x++){
 			for (int y = 0; y <= 59; y++){
-				//Draw blue walls
 				if (aStar.possibilidadeDeCaminhada[x][y] == aStar.caminhoBloqueado) {
 					pixmap.fillRectangle(x*AStar.tamanhoPixel,y*AStar.tamanhoPixel,AStar.tamanhoPixel,AStar.tamanhoPixel);
 				}
@@ -155,30 +122,27 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		mapImage.flip(false, true);
 	}
 
-	void CreateWallImage(){
+	void criarParedeImagem(){
 		Pixmap pixmap = new Pixmap(16, 16, Format.RGB888);
 		pixmap.setColor(Color.BLUE);
 		pixmap.drawRectangle(0,0,10,10);
 		Texture map = new Texture(pixmap);
-		wallImage = new TextureRegion(map, 10,10);
+		paredeImage = new TextureRegion(map, 10,10);
 	}
 
 	void DrawMap(SpriteBatch batch){
-		if (smileyActivated == 1) 
+		if (ladraoAtivado == 1) 
 			batch.draw(mapImage,0,0);
 		else
 		{
 			for (int x = 0; x <= 79; x++){
 				for (int y = 0; y <= 59; y++){
 
-					//Draw blue walls
-					//				if (aStar.walkability[x][y] == AStar.caminhoBloqueado) 
-					//					batch.draw(wallImage,x*AStar.tamanhoPixel,y*AStar.tamanhoPixel,AStar.tamanhoPixel,AStar.tamanhoPixel);
 				}}
 		}
 	}
 
-	void EditMap(){
+	void editarMapa(){
 		if (Gdx.input.isTouched())
 		{
 			Vector3 touchPos = new Vector3();
@@ -191,22 +155,17 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		}
 	}
 
-	void LoadGraphics(){
+	void carregarGraficos(){
 		atlas = new TextureAtlas("data/textures.pack");
-		//		SetFont("Arial",14);
-		CreateWallImage();
-		CreateMapImage();
+		criarParedeImagem();
+		criarMapaImagem();
 
-		smiley = atlas.findRegion("smiley x 10");
+		ladraoRegion = atlas.findRegion("smiley x 10");
 
-		chaser = atlas.findRegion("ghost x 10");
+		policiaRegion = atlas.findRegion("ghost x 10");
 	}
 
-	//-----------------------------------------------------------------------------
-	// Name: LoadMapData
-	// Desc: Load any pre-existing map when launching the program.
-	//-----------------------------------------------------------------------------
-	void LoadMapData(){
+	void carregarMapa(){
 
 		FileReader reader;
 		try {
@@ -220,7 +179,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 					}}
 				reader.close();
 			}
-			else //initialize the map to completely walkable
+			else 
 			{
 				for (int x = 0; x <= 79; x++){
 					for (int y = 0; y <= 59; y++){
@@ -235,44 +194,30 @@ public class CopsAndRobbersGame implements ApplicationListener {
 	}
 
 
-	//-----------------------------------------------------------------------------
-	// Name: LoadUnitData
-	// Desc: Initialize unit-related data
-	//-----------------------------------------------------------------------------
-	void LoadUnitData(){
-		xLoc[1] = 80 ; yLoc[1] = 160; //initial smiley location
-		xLoc[2] = 320 ; yLoc[2] = 320; //initial chaser location
-		xLoc[3] = 160 ; yLoc[3] = 320; //initial chaser location	
-		speed[1] = 3;//smiley speed
-		speed[2] = 2;//chaser
-		speed[3] = 1;//chaser
+	void carregarUnidades(){
+		xLoc[1] = 80 ; yLoc[1] = 160; //posição inicial do ladrão
+		xLoc[2] = 320 ; yLoc[2] = 320; //posição inicial do policial
+		xLoc[3] = 160 ; yLoc[3] = 320; //posição inicial do policial
+		speed[1] = 3;//velocidade do ladrão
+		speed[2] = 2;//velocidade do policial
+		speed[3] = 1;//velocidade do policial
 	}
 
-	//-----------------------------------------------------------------------------
-	// Name: MoveChaser
-	// Desc: This subroutine moves the chasers/ghosts around on the screen.
-	//		In this case the encontrarCaminho function is accessed automatically when
-	//		a chaser reaches the end of his current path. The path info
-	//		is also updated occasionally.
-	//-----------------------------------------------------------------------------
-	void MoveChaser(int ID){
-		int targetID = 1; //ID of target (the smiley)
+	void movePolicia(int ID){
+		int targetID = 1; 
 
-		//1. Find Path: If smiley and chaser are not at the same location on the 
-		//			screen and no path is currently active, find a new path.
+		//1. Procurar caminho: Se os agentes não estão na mesma posição procure um caminho
 		if (xLoc[ID] != xLoc[targetID] || yLoc[ID] != yLoc[targetID]) 
 		{
-			//If no path has been generated, generate one. Update it when
-			//the chaser reaches its fifth step on the current path.	
+			//Se nenhum caminho foi gerado, gere um. Atualize-o quando o policial 1 alcançar 10 passos.
 			if (aStar.statusDoCaminho[ID] == AStar.naoComecou|| aStar.localizacaoDoCaminho[ID] == 10)
 			{
-				//Generate a new path. Enter coordinates of smiley sprite (xLoc(1)/
-				//yLoc(1)) as the target.
 				if(ID == 2){
 					aStar.statusDoCaminho[ID] = aStar.encontrarCaminho(ID,xLoc[ID],yLoc[ID],
 							xLoc[targetID],yLoc[targetID]);
 				}
 			}
+			//Se nenhum caminho foi gerado, gere um. Atualize-o quando o policial 2 alcançar 100 passos.
 			if (aStar.statusDoCaminho[ID] == AStar.naoComecou|| aStar.localizacaoDoCaminho[ID] == 100){
 				if(ID == 3){
 					aStar.statusDoCaminho[ID] = aStar.encontrarCaminhoBuscaCega(ID,xLoc[ID],yLoc[ID],
@@ -281,52 +226,37 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			}
 		} 
 
-		//2.Move chaser.
 		if (aStar.statusDoCaminho[ID] == AStar.encontrado) MoveSprite(ID);
 	}
 
-	void MoveSmiley(){
-		int ID = 1; //ID of smiley sprite
+	void moveLadrao(){
+		int ID = 1; //ID do ladrão
 
-		//1.Find Path: If smiley is active, any left or right click 
-		//			on the map will find a path and make him go there.
 		if (Gdx.input.isButtonPressed(Buttons.LEFT) || Gdx.input.isButtonPressed(Buttons.RIGHT))
 		{	
 			Vector3 touchPos = new Vector3();
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(touchPos);
 
-			//Call the encontrarCaminho function.
 			long time1 = TimeUtils.millis();
 			aStar.statusDoCaminho[ID] = aStar.encontrarCaminho(ID,xLoc[ID],yLoc[ID],(int)touchPos.x,(int)touchPos.y);
 			long time2 = TimeUtils.millis();
-			searchTime = time2-time1;
+			tempoBusca = time2-time1;
 		}
 
-		//2.Move smiley.
 		if (aStar.statusDoCaminho[ID] == AStar.encontrado) MoveSprite(ID);
 	}
 
 	void MoveSprite(int ID){
-		//1.Read path information
 		aStar.leituraDoCaminho(ID,xLoc[ID],yLoc[ID],speed[ID]);
 
-		//2.Move sprite. xLoc/yLoc = current location of sprite. caminhoX and
-		//		caminhoY = coordinates of next step on the path that were/are
-		//		read using the readPath function.
 		if (xLoc[ID] > aStar.caminhoX[ID]) xLoc[ID] = xLoc[ID] - speed[ID];
 		if (xLoc[ID] < aStar.caminhoX[ID]) xLoc[ID] = xLoc[ID] + speed[ID];
 		if (yLoc[ID] > aStar.caminhoY[ID]) yLoc[ID] = yLoc[ID] - speed[ID];		
 		if (yLoc[ID] < aStar.caminhoY[ID]) yLoc[ID] = yLoc[ID] + speed[ID];
 
-		//3.When sprite reaches the end location square	(end of its current
-		//		path) ...		
 		if (aStar.localizacaoDoCaminho[ID] == aStar.tamanhoDoCaminho[ID]) 
 		{
-			//			Center the chaser in the square (not really necessary, but 
-			//			it looks a little better for the chaser, which moves in 3 pixel
-			//			increments and thus isn't always centered when it reaches its
-			//			target).
 			if (Math.abs(xLoc[ID] - aStar.caminhoX[ID]) < speed[ID]) xLoc[ID] = aStar.caminhoX[ID];
 			if (Math.abs(yLoc[ID] - aStar.caminhoY[ID]) < speed[ID]) yLoc[ID] = aStar.caminhoY[ID];
 		}
@@ -339,46 +269,22 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 
-		batch.draw(mapImage, 0, 0);
-
-		DrawMap(batch);
-
-		batch.draw(smiley,xLoc[1],yLoc[1],AStar.tamanhoPixel,AStar.tamanhoPixel);
-		for (char ID = 2; ID <= 3; ID++)
-			batch.draw(chaser,xLoc[ID],yLoc[ID],AStar.tamanhoPixel,AStar.tamanhoPixel);
-
-		//Show directions
-		if (g_showDirections != 0) 
-			ShowDirections();
-		else
-		{
-			//			SetFont("Arial",14);
-			//			Text(0,0,"Press space bar for directions");
-		}
-
-		if (smileyActivated == 0) 
-		{
-			//			SetFontColor (255,0,0);
-			//			Text (0,20,"Map Edit Mode");
-			//			SetFontColor (255,255,255);
-		}
-		//		else
-		//			Text (0,20,combine "Search Time = " + searchTime + " ms");
-		//		DrawImage (mousePointer,MouseX(),MouseY());
-		//		Flip();
-
+			batch.draw(mapImage, 0, 0);
+	
+			DrawMap(batch);
+	
+			batch.draw(ladraoRegion,xLoc[1],yLoc[1],AStar.tamanhoPixel,AStar.tamanhoPixel);
+			for (char ID = 2; ID <= 3; ID++)
+				batch.draw(policiaRegion,xLoc[ID],yLoc[ID],AStar.tamanhoPixel,AStar.tamanhoPixel);
+	
 		batch.end();
 
+	}
+
+	void salvarMapa(){
 
 	}
 
-	void SaveMapData(){
-
-	}
-
-	void ShowDirections(){
-
-	}
 
 
 }

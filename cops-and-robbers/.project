@@ -18,7 +18,7 @@
 		<link>
 			<name>assets</name>
 			<type>2</type>
-			<location>/home/niltonvasques/trab1-ia-ufba-2014/cops-and-robbers-android/assets</location>
+			<locationURI>PARENT-3-ECLIPSE_HOME/home/niltonvasques/trab1-ia-ufba-2014/cops-and-robbers-android/assets</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
