@@ -19,11 +19,11 @@ public class AStar {
 	public static final int naoComecou = 0;
 	public static final int encontrado = 1, naoExiste = 2; 
 	public static final int caminhoPassavel = 0, caminhoBloqueado = 1;    // constantes referente a habilidade de andar.
-	public int onClosedList = 10;
+	public int naListaFechada = 10;
 
 	//Create needed arrays
-	public char[][] walkability = new char[larguraTela][alturaTela];
-	public int[] openList = new int[larguraTela*alturaTela+2]; //array de 1 dimensão que segunda uma lista aberta de items
+	public char[][] espacoDeCaminhada = new char[larguraTela][alturaTela];
+	public int[] listaAberta = new int[larguraTela*alturaTela+2]; //array de 1 dimensão que segunda uma lista aberta de items
 	public int[][] whichList = new int[larguraTela+1][alturaTela+1];  //array de 2 dimensões usado para gravar  
 	// 		se uma célula está na lista aberta ou na lista fechada.
 	public int[] openX = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição x de um item na lista aberta.
@@ -63,9 +63,9 @@ public class AStar {
 	public int FindPath (int pathfinderID, int startingX, int startingY,
 			int targetX, int targetY)
 	{
-		int onOpenList=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, newOpenListItemID=0;
+		int naListaAberta=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
 
-		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de walkability.
+		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de espacoDeCaminhada.
 		int startX = startingX/tamanhoPixel;
 		int startY = startingY/tamanhoPixel;	
 		targetX = targetX/tamanhoPixel;
@@ -80,7 +80,7 @@ public class AStar {
 			return naoExiste;
 
 		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
-		if (walkability[targetX][targetY] == caminhoBloqueado)
+		if (espacoDeCaminhada[targetX][targetY] == caminhoBloqueado)
 		{
 			xPath[pathfinderID] = startingX;
 			yPath[pathfinderID] = startingY;
@@ -88,23 +88,23 @@ public class AStar {
 		}
 
 		//3. Resetando algumas variáveis que precisam ser limpas
-		if (onClosedList > 1000000) //Resetando whichList ocasionalmente
+		if (naListaFechada > 1000000) //Resetando whichList ocasionalmente
 		{
 			for (int x = 0; x < larguraTela; x++) {
 				for (int y = 0; y < alturaTela; y++)
 					whichList [x][y] = 0;
 			}
-			onClosedList = 10;	
+			naListaFechada = 10;	
 		}
-		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list eh mais rapida do que redimensionar whichList() array;
-		onOpenList = onClosedList-1;
+		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list eh mais rapida do que redimensionar whichList() array;
+		naListaAberta = naListaFechada-1;
 		pathLength [pathfinderID] = naoComecou;//i.e, = 0
 		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
 		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
-		//4. Adicionando a posicao inicial openList de quadrados para serem verificados.
-		numberOfOpenListItems = 1;
-		openList[1] = 1;		//colocando este como o item do topo(e atualmente somente) da openList, que eh mantida como uma heap binaria.
+		//4. Adicionando a posicao inicial listaAberta de quadrados para serem verificados.
+		numItemsListaAberta = 1;
+		listaAberta[1] = 1;		//colocando este como o item do topo(e atualmente somente) da listaAberta, que eh mantida como uma heap binaria.
 
 		openX[1] = startX;
 		openY[1] = startY;
@@ -113,52 +113,52 @@ public class AStar {
 		do
 		{
 
-			//6. Se a openList não é vazia, pegue a primeira célula da lista.
-			//	Esta possui o menor custo da função F na openList.
-			if (numberOfOpenListItems != 0)
+			//6. Se a listaAberta não é vazia, pegue a primeira célula da lista.
+			//	Esta possui o menor custo da função F na listaAberta.
+			if (numItemsListaAberta != 0)
 			{
 
-				//7. Remova o primeiro item da openList.
-				parentXval = openX[openList[1]];
-				parentYval = openY[openList[1]]; //Grave as coordenadas da celula do item
-				whichList[parentXval][parentYval] = onClosedList;//adicione o item para a closedList
+				//7. Remova o primeiro item da listaAberta.
+				parentXval = openX[listaAberta[1]];
+				parentYval = openY[listaAberta[1]]; //Grave as coordenadas da celula do item
+				whichList[parentXval][parentYval] = naListaFechada;//adicione o item para a closedList
 
-				//OpenList = Heap binária: Delete este item da openList, que é mantido como uma heap binária. Para mais informações veja:
+				//listaAberta = Heap binária: Delete este item da listaAberta, que é mantido como uma heap binária. Para mais informações veja:
 				// http://www.policyalmanac.org/games/binaryHeaps.htm
-				numberOfOpenListItems = numberOfOpenListItems - 1;//reduzindo o numero de items da openList em 1	
+				numItemsListaAberta = numItemsListaAberta - 1;//reduzindo o numero de items da listaAberta em 1	
 
 				// Delete o item do topo na heap binaria, e reordene a heap, com o item de menor custo da função F indo para o topo.
-				openList[1] = openList[numberOfOpenListItems+1];//mova o ultimo item na heap a cima para o slot #1
+				listaAberta[1] = listaAberta[numItemsListaAberta+1];//mova o ultimo item na heap a cima para o slot #1
 				v = 1;
 
 				//Repita o seguinte até que o novo item no slot1 caia para a sua própria posição na heap.
 				do
 				{
 					u = v;		
-					if (2*u+1 <= numberOfOpenListItems) //Se ambos os filhos existirem
+					if (2*u+1 <= numItemsListaAberta) //Se ambos os filhos existirem
 					{
 						//Verifique se o custo de F do pai é maior do que cada filho.
 						//Selecione o menor dos dois filhos.
-						if (Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+						if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
 							v = 2*u;
-						if (Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
+						if (Fcost[listaAberta[v]] >= Fcost[listaAberta[2*u+1]]) 
 							v = 2*u+1;		
 					}
 					else
 					{
-						if (2*u <= numberOfOpenListItems) //Se somente o filho 1 existe
+						if (2*u <= numItemsListaAberta) //Se somente o filho 1 existe
 						{
 							//Verifique se o custo de F do pai é maior do que o filho 1.
-							if (Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+							if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
 								v = 2*u;
 						}
 					}
 
 					if (u != v) //Se o custo de F do pai é > do um dos filhos troque eles.
 					{
-						temp = openList[u];
-						openList[u] = openList[v];
-						openList[v] = temp;			
+						temp = listaAberta[u];
+						listaAberta[u] = listaAberta[v];
+						listaAberta[v] = temp;			
 					}
 					else
 						break; //de outro modo, saia do loop
@@ -169,7 +169,7 @@ public class AStar {
 				//7. Verifique os quadrados adjacentes. (Estes "filhos" -- aquele caminho dos filhos são similares,
 				//conceitualmente, para a heap binaria mencionada a cima, mas não confuda eles. Eles são diferentes.
 				//O caminho dos filhos são descritos no Demo 1 com pontos cinzas a frente dos pais.) Adicione aqueles 
-				//quadrados dos filhos adjacens para a openList para posterior consideração se apropriado. (ver vários blocos abaixo).
+				//quadrados dos filhos adjacens para a listaAberta para posterior consideração se apropriado. (ver vários blocos abaixo).
 				for (b = parentYval-1; b <= parentYval+1; b++){
 					for (a = parentXval-1; a <= parentXval+1; a++){
 
@@ -177,10 +177,10 @@ public class AStar {
 						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
 
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
-							if (whichList[a][b] != onClosedList) { 
+							if (whichList[a][b] != naListaFechada) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
-								if (walkability [a][b] != caminhoBloqueado) { 
+								if (espacoDeCaminhada [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
 									corner = caminhoPassavel;	
@@ -188,12 +188,12 @@ public class AStar {
 									{
 										if (b == parentYval-1)
 										{
-											if (walkability[parentXval-1][parentYval] == caminhoBloqueado || walkability[parentXval][parentYval-1] == caminhoBloqueado)  corner = caminhoBloqueado;
+											if (espacoDeCaminhada[parentXval-1][parentYval] == caminhoBloqueado || espacoDeCaminhada[parentXval][parentYval-1] == caminhoBloqueado)  corner = caminhoBloqueado;
 										}
 										else if (b == parentYval+1)
 										{
-											if (walkability[parentXval][parentYval+1] == caminhoBloqueado
-													|| walkability[parentXval-1][parentYval] == caminhoBloqueado) 
+											if (espacoDeCaminhada[parentXval][parentYval+1] == caminhoBloqueado
+													|| espacoDeCaminhada[parentXval-1][parentYval] == caminhoBloqueado) 
 												corner = caminhoBloqueado; 
 										}
 									}
@@ -201,29 +201,29 @@ public class AStar {
 									{
 										if (b == parentYval-1)
 										{
-											if (walkability[parentXval][parentYval-1] == caminhoBloqueado 
-													|| walkability[parentXval+1][parentYval] == caminhoBloqueado) 
+											if (espacoDeCaminhada[parentXval][parentYval-1] == caminhoBloqueado 
+													|| espacoDeCaminhada[parentXval+1][parentYval] == caminhoBloqueado) 
 												corner = caminhoBloqueado;
 										}
 										else if (b == parentYval+1)
 										{
-											if (walkability[parentXval+1][parentYval] == caminhoBloqueado 
-													|| walkability[parentXval][parentYval+1] == caminhoBloqueado)
+											if (espacoDeCaminhada[parentXval+1][parentYval] == caminhoBloqueado 
+													|| espacoDeCaminhada[parentXval][parentYval+1] == caminhoBloqueado)
 												corner = caminhoBloqueado; 
 										}
 									}	
 									if (corner == caminhoPassavel) {
 
-										//		Se não já está na openList, adicione este para a openlist.			
-										if (whichList[a][b] != onOpenList) 
+										//		Se não já está na listaAberta, adicione este para a listaAberta.			
+										if (whichList[a][b] != naListaAberta) 
 										{	
 
-											//Cria um item novo na openList na heap binaria.
-											newOpenListItemID = newOpenListItemID + 1; //Cada novo item tem um ID unico.
-											m = numberOfOpenListItems+1;
-											openList[m] = newOpenListItemID;// Coloque o novo item da openList(atualmente ID#) na base da heap.
-											openX[newOpenListItemID] = a;
-											openY[newOpenListItemID] = b;//grave suas coordenadas x e y do novo item
+											//Cria um item novo na listaAberta na heap binaria.
+											novoIDItemListaAberta = novoIDItemListaAberta + 1; //Cada novo item tem um ID unico.
+											m = numItemsListaAberta+1;
+											listaAberta[m] = novoIDItemListaAberta;// Coloque o novo item da listaAberta(atualmente ID#) na base da heap.
+											openX[novoIDItemListaAberta] = a;
+											openY[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
 
 											//Calculando o custo de G
 											if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
@@ -233,38 +233,38 @@ public class AStar {
 											Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost;
 
 											//Calcular os custos H e F e o pai
-											Hcost[openList[m]] = AStar.tamanhoPixel*(Math.abs(a - targetX) + Math.abs(b - targetY));
-											Fcost[openList[m]] = Gcost[a][b] + Hcost[openList[m]];
+											Hcost[listaAberta[m]] = AStar.tamanhoPixel*(Math.abs(a - targetX) + Math.abs(b - targetY));
+											Fcost[listaAberta[m]] = Gcost[a][b] + Hcost[listaAberta[m]];
 											parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
 
-											//Mover o novo item da openList para o seu pŕoprio lugar na heap binária.
+											//Mover o novo item da listaAberta para o seu pŕoprio lugar na heap binária.
 											//Iniciando da base, sucessivamente comparar items pais, 
 											//trocando quando necessário até que o item encontre seu lugar na heap.
 											//ou borbulhando todos os caminhos para o topo (se este tem o menor custo de F).
 											while (m != 1) //Enquanto o item não tem sido borbulhado para o topo(m=1)	
 											{
 												//Verifique se o custo F do filho é < o custo F do pai. Se for, troque-os.
-												if (Fcost[openList[m]] <= Fcost[openList[m/2]])
+												if (Fcost[listaAberta[m]] <= Fcost[listaAberta[m/2]])
 												{
-													temp = openList[m/2];
-													openList[m/2] = openList[m];
-													openList[m] = temp;
+													temp = listaAberta[m/2];
+													listaAberta[m/2] = listaAberta[m];
+													listaAberta[m] = temp;
 													m = m/2;
 												}
 												else
 													break;
 											}
-											numberOfOpenListItems = numberOfOpenListItems+1;//Adicione um para o número de items na heap
+											numItemsListaAberta = numItemsListaAberta+1;//Adicione um para o número de items na heap
 
-											//Troque whichList para mostrar que o novo item está na openList.
-											whichList[a][b] = onOpenList;
+											//Troque whichList para mostrar que o novo item está na listaAberta.
+											whichList[a][b] = naListaAberta;
 										}
 
 										//8.If adjacent cell is already on the open list, check to see if this
-										//8. Se a célula adjacente já está na openList, verifique para ver se este
+										//8. Se a célula adjacente já está na listaAberta, verifique para ver se este
 										//		caminho para a aquela célula da posição inicial, é um melhor.
 										//		Se for, troque o pai da célula e seus custos G e F.	
-										else //Se whichList(a,b) = onOpenList
+										else //Se whichList(a,b) = naListaAberta
 										{
 
 											//Calcular o custo G deste possível caminho novo.
@@ -283,36 +283,36 @@ public class AStar {
 												Gcost[a][b] = tempGcost;//troque o custo de G			
 
 												//Porque trocando o custo de G também muda o custo de F, se 
-												//o item está na openList nós precisamos alterar o custo F 
-												//gravado no item e sua posição na openList para ter certeza 
-												//que nós mantemos uma openList corretamente ordenada.
-												for (int x = 1; x <= numberOfOpenListItems; x++) //olho para o item na openList
+												//o item está na listaAberta nós precisamos alterar o custo F 
+												//gravado no item e sua posição na listaAberta para ter certeza 
+												//que nós mantemos uma listaAberta corretamente ordenada.
+												for (int x = 1; x <= numItemsListaAberta; x++) //olho para o item na listaAberta
 												{
-													if (openX[openList[x]] == a && openY[openList[x]] == b) //item encontrado
+													if (openX[listaAberta[x]] == a && openY[listaAberta[x]] == b) //item encontrado
 													{
-														Fcost[openList[x]] = Gcost[a][b] + Hcost[openList[x]];//troque o custo F
+														Fcost[listaAberta[x]] = Gcost[a][b] + Hcost[listaAberta[x]];//troque o custo F
 
 														//Veja se alterando o bubbles score de F do item a cima da sua localização corrente na heap.
 														m = x;
 														while (m != 1) //Enquanto o item não foi borbulhado para o topo (m = 1).	
 														{
 															//Verifique se o filho é < pai. Se for, troque-os.
-															if (Fcost[openList[m]] < Fcost[openList[m/2]])
+															if (Fcost[listaAberta[m]] < Fcost[listaAberta[m/2]])
 															{
-																temp = openList[m/2];
-																openList[m/2] = openList[m];
-																openList[m] = temp;
+																temp = listaAberta[m/2];
+																listaAberta[m/2] = listaAberta[m];
+																listaAberta[m] = temp;
 																m = m/2;
 															}
 															else
 																break;
 														} 
 														break; //saia para x = loop
-													} //Se openX(openList(x)) = a
-												} //For x = 1 To numberOfOpenListItems
+													} //Se openX(listaAberta(x)) = a
+												} //For x = 1 To numItemsListaAberta
 											}//If tempGcost < Gcost(a,b)
 
-										}//else If whichList(a,b) = onOpenList	
+										}//else If whichList(a,b) = naListaAberta	
 									}//If não cortando um canto
 								}//If não um quadrado parede.
 							}//If não já está na closedList 
@@ -320,16 +320,16 @@ public class AStar {
 					}//for (a = parentXval-1; a <= parentXval+1; a++){
 				}//for (b = parentYval-1; b <= parentYval+1; b++){
 
-			}//if (numberOfOpenListItems != 0)
+			}//if (numItemsListaAberta != 0)
 
-			//9. Se a openList está vazia então não existe um caminho.
+			//9. Se a listaAberta está vazia então não existe um caminho.
 			else
 			{
 				path = naoExiste; break;
 			}  
 
-			//Se o alvo é adicionado a openList, então o caminho foi encontrado.
-			if (whichList[targetX][targetY] == onOpenList)
+			//Se o alvo é adicionado a listaAberta, então o caminho foi encontrado.
+			if (whichList[targetX][targetY] == naListaAberta)
 			{
 				path = encontrado; break;
 			}
@@ -485,9 +485,9 @@ public class AStar {
 	public int FindPathBuscaCega (int pathfinderID, int startingX, int startingY,
 			int targetX, int targetY)
 	{
-		int onOpenList=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, newOpenListItemID=0;
+		int naListaAberta=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
 
-		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de walkability.
+		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de espacoDeCaminhada.
 		int startX = startingX/tamanhoPixel;
 		int startY = startingY/tamanhoPixel;	
 		targetX = targetX/tamanhoPixel;
@@ -502,7 +502,7 @@ public class AStar {
 			return naoExiste;
 
 		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
-		if (walkability[targetX][targetY] == caminhoBloqueado)
+		if (espacoDeCaminhada[targetX][targetY] == caminhoBloqueado)
 		{
 			xPath[pathfinderID] = startingX;
 			yPath[pathfinderID] = startingY;
@@ -510,23 +510,23 @@ public class AStar {
 		}
 
 		//3. Resetando algumas variáveis que precisam ser limpas
-		if (onClosedList > 1000000) //Resetando whichList ocasionalmente
+		if (naListaFechada > 1000000) //Resetando whichList ocasionalmente
 		{
 			for (int x = 0; x < larguraTela; x++) {
 				for (int y = 0; y < alturaTela; y++)
 					whichList [x][y] = 0;
 			}
-			onClosedList = 10;	
+			naListaFechada = 10;	
 		}
-		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list é mais rapida do que redimming whichList() array;
-		onOpenList = onClosedList-1;
+		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list é mais rapida do que redimming whichList() array;
+		naListaAberta = naListaFechada-1;
 		pathLength [pathfinderID] = naoComecou;//i.e, = 0
 		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
 		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
-		//4. Adicionando a posição inicial openList de quadrados para serem verificados.
-		numberOfOpenListItems = 1;
-		openList[1] = 1;		//colocando este como o item do topo(e atualmente somente) da openList, que é mantida como uma heap binaria.
+		//4. Adicionando a posição inicial listaAberta de quadrados para serem verificados.
+		numItemsListaAberta = 1;
+		listaAberta[1] = 1;		//colocando este como o item do topo(e atualmente somente) da listaAberta, que é mantida como uma heap binaria.
 
 		openX[1] = startX;
 		openY[1] = startY;
@@ -535,52 +535,52 @@ public class AStar {
 		do
 		{
 
-			//6. Se a openList não é vazia, pegue a primeira célula da lista.
-			//	Esta possui o menor custo da função F na openList.
-			if (numberOfOpenListItems != 0)
+			//6. Se a listaAberta não é vazia, pegue a primeira célula da lista.
+			//	Esta possui o menor custo da função F na listaAberta.
+			if (numItemsListaAberta != 0)
 			{
 
-				//7. Remova o primeiro item da openList.
-				parentXval = openX[openList[1]];
-				parentYval = openY[openList[1]]; //Grave as coordenadas da celula do item
-				whichList[parentXval][parentYval] = onClosedList;//adicione o item para a closedList
+				//7. Remova o primeiro item da listaAberta.
+				parentXval = openX[listaAberta[1]];
+				parentYval = openY[listaAberta[1]]; //Grave as coordenadas da celula do item
+				whichList[parentXval][parentYval] = naListaFechada;//adicione o item para a closedList
 
-				//OpenList = Heap binária: Delete este item da openList, que é mantido como uma heap binária. Para mais informações veja:
+				//listaAberta = Heap binária: Delete este item da listaAberta, que é mantido como uma heap binária. Para mais informações veja:
 				// http://www.policyalmanac.org/games/binaryHeaps.htm
-				numberOfOpenListItems = numberOfOpenListItems - 1;//reduzindo o numero de items da openList em 1	
+				numItemsListaAberta = numItemsListaAberta - 1;//reduzindo o numero de items da listaAberta em 1	
 
 				// Delete o item do topo na heap binaria, e reordene a heap, com o item de menor custo da função F indo para o topo.
-				openList[1] = openList[numberOfOpenListItems+1];//mova o ultimo item na heap a cima para o slot #1
+				listaAberta[1] = listaAberta[numItemsListaAberta+1];//mova o ultimo item na heap a cima para o slot #1
 				v = 1;
 
 				//Repita o seguinte até que o novo item no slot1 caia para a sua própria posição na heap.
 				do
 				{
 					u = v;		
-					if (2*u+1 <= numberOfOpenListItems) //Se ambos os filhos existirem
+					if (2*u+1 <= numItemsListaAberta) //Se ambos os filhos existirem
 					{
 						//Verifique se o custo de F do pai é maior do que cada filho.
 						//Selecione o menor dos dois filhos.
-						if (Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+						if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
 							v = 2*u;
-						if (Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
+						if (Fcost[listaAberta[v]] >= Fcost[listaAberta[2*u+1]]) 
 							v = 2*u+1;		
 					}
 					else
 					{
-						if (2*u <= numberOfOpenListItems) //Se somente o filho 1 existe
+						if (2*u <= numItemsListaAberta) //Se somente o filho 1 existe
 						{
 							//Verifique se o custo de F do pai é maior do que o filho 1.
-							if (Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+							if (Fcost[listaAberta[u]] >= Fcost[listaAberta[2*u]]) 
 								v = 2*u;
 						}
 					}
 
 					if (u != v) //Se o custo de F do pai é > do um dos filhos troque eles.
 					{
-						temp = openList[u];
-						openList[u] = openList[v];
-						openList[v] = temp;			
+						temp = listaAberta[u];
+						listaAberta[u] = listaAberta[v];
+						listaAberta[v] = temp;			
 					}
 					else
 						break; //de outro modo, saia do loop
@@ -591,7 +591,7 @@ public class AStar {
 				//7. Verifique os quadrados adjacentes. (Estes "filhos" -- aquele caminho dos filhos são similares,
 				//conceitualmente, para a heap binaria mencionada a cima, mas não confuda eles. Eles são diferentes.
 				//O caminho dos filhos são descritos no Demo 1 com pontos cinzas a frente dos pais.) Adicione aqueles 
-				//quadrados dos filhos adjacens para a openList para posterior consideração se apropriado. (ver vários blocos abaixo).
+				//quadrados dos filhos adjacens para a listaAberta para posterior consideração se apropriado. (ver vários blocos abaixo).
 				for (b = parentYval-1; b <= parentYval+1; b++){
 					for (a = parentXval-1; a <= parentXval+1; a++){
 
@@ -599,10 +599,10 @@ public class AStar {
 						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
 
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
-							if (whichList[a][b] != onClosedList) { 
+							if (whichList[a][b] != naListaFechada) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
-								if (walkability [a][b] != caminhoBloqueado) { 
+								if (espacoDeCaminhada [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
 									corner = caminhoPassavel;	
@@ -610,12 +610,12 @@ public class AStar {
 									{
 										if (b == parentYval-1)
 										{
-											if (walkability[parentXval-1][parentYval] == caminhoBloqueado || walkability[parentXval][parentYval-1] == caminhoBloqueado)  corner = caminhoBloqueado;
+											if (espacoDeCaminhada[parentXval-1][parentYval] == caminhoBloqueado || espacoDeCaminhada[parentXval][parentYval-1] == caminhoBloqueado)  corner = caminhoBloqueado;
 										}
 										else if (b == parentYval+1)
 										{
-											if (walkability[parentXval][parentYval+1] == caminhoBloqueado
-													|| walkability[parentXval-1][parentYval] == caminhoBloqueado) 
+											if (espacoDeCaminhada[parentXval][parentYval+1] == caminhoBloqueado
+													|| espacoDeCaminhada[parentXval-1][parentYval] == caminhoBloqueado) 
 												corner = caminhoBloqueado; 
 										}
 									}
@@ -623,29 +623,29 @@ public class AStar {
 									{
 										if (b == parentYval-1)
 										{
-											if (walkability[parentXval][parentYval-1] == caminhoBloqueado 
-													|| walkability[parentXval+1][parentYval] == caminhoBloqueado) 
+											if (espacoDeCaminhada[parentXval][parentYval-1] == caminhoBloqueado 
+													|| espacoDeCaminhada[parentXval+1][parentYval] == caminhoBloqueado) 
 												corner = caminhoBloqueado;
 										}
 										else if (b == parentYval+1)
 										{
-											if (walkability[parentXval+1][parentYval] == caminhoBloqueado 
-													|| walkability[parentXval][parentYval+1] == caminhoBloqueado)
+											if (espacoDeCaminhada[parentXval+1][parentYval] == caminhoBloqueado 
+													|| espacoDeCaminhada[parentXval][parentYval+1] == caminhoBloqueado)
 												corner = caminhoBloqueado; 
 										}
 									}	
 									if (corner == caminhoPassavel) {
 
-										//		Se não já está na openList, adicione este para a openlist.			
-										if (whichList[a][b] != onOpenList) 
+										//		Se não já está na listaAberta, adicione este para a listaAberta.			
+										if (whichList[a][b] != naListaAberta) 
 										{	
 
-											//Cria um item novo na openList na heap binaria.
-											newOpenListItemID = newOpenListItemID + 1; //Cada novo item tem um ID unico.
-											m = numberOfOpenListItems+1;
-											openList[m] = newOpenListItemID;// Coloque o novo item da openList(atualmente ID#) na base da heap.
-											openX[newOpenListItemID] = a;
-											openY[newOpenListItemID] = b;//grave suas coordenadas x e y do novo item
+											//Cria um item novo na listaAberta na heap binaria.
+											novoIDItemListaAberta = novoIDItemListaAberta + 1; //Cada novo item tem um ID unico.
+											m = numItemsListaAberta+1;
+											listaAberta[m] = novoIDItemListaAberta;// Coloque o novo item da listaAberta(atualmente ID#) na base da heap.
+											openX[novoIDItemListaAberta] = a;
+											openY[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
 
 											//Calculando o custo de G
 											if (Math.abs(a-parentXval) == 1 && Math.abs(b-parentYval) == 1)
@@ -655,38 +655,38 @@ public class AStar {
 											Gcost[a][b] = 1;
 
 											//Calcular os custos H e F e o pai
-											Hcost[openList[m]] = 1;
-											Fcost[openList[m]] = Gcost[a][b] + Hcost[openList[m]];
+											Hcost[listaAberta[m]] = 1;
+											Fcost[listaAberta[m]] = Gcost[a][b] + Hcost[listaAberta[m]];
 											parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
 
-											//Mover o novo item da openList para o seu pŕoprio lugar na heap binária.
+											//Mover o novo item da listaAberta para o seu pŕoprio lugar na heap binária.
 											//Iniciando da base, sucessivamente comparar items pais, 
 											//trocando quando necessário até que o item encontre seu lugar na heap.
 											//ou borbulhando todos os caminhos para o topo (se este tem o menor custo de F).
 											while (m != 1) //Enquanto o item não tem sido borbulhado para o topo(m=1)	
 											{
 												//Verifique se o custo F do filho é < o custo F do pai. Se for, troque-os.
-												if (Fcost[openList[m]] <= Fcost[openList[m/2]])
+												if (Fcost[listaAberta[m]] <= Fcost[listaAberta[m/2]])
 												{
-													temp = openList[m/2];
-													openList[m/2] = openList[m];
-													openList[m] = temp;
+													temp = listaAberta[m/2];
+													listaAberta[m/2] = listaAberta[m];
+													listaAberta[m] = temp;
 													m = m/2;
 												}
 												else
 													break;
 											}
-											numberOfOpenListItems = numberOfOpenListItems+1;//Adicione um para o número de items na heap
+											numItemsListaAberta = numItemsListaAberta+1;//Adicione um para o número de items na heap
 
-											//Troque whichList para mostrar que o novo item está na openList.
-											whichList[a][b] = onOpenList;
+											//Troque whichList para mostrar que o novo item está na listaAberta.
+											whichList[a][b] = naListaAberta;
 										}
 
 										//8.If adjacent cell is already on the open list, check to see if this
-										//8. Se a célula adjacente já está na openList, verifique para ver se este
+										//8. Se a célula adjacente já está na listaAberta, verifique para ver se este
 										//		caminho para a aquela célula da posição inicial, é um melhor.
 										//		Se for, troque o pai da célula e seus custos G e F.	
-										else //Se whichList(a,b) = onOpenList
+										else //Se whichList(a,b) = naListaAberta
 										{
 
 											//Calcular o custo G deste possível caminho novo.
@@ -705,36 +705,36 @@ public class AStar {
 												Gcost[a][b] = tempGcost;//troque o custo de G			
 
 												//Porque trocando o custo de G também muda o custo de F, se 
-												//o item está na openList nós precisamos alterar o custo F 
-												//gravado no item e sua posição na openList para ter certeza 
-												//que nós mantemos uma openList corretamente ordenada.
-												for (int x = 1; x <= numberOfOpenListItems; x++) //olho para o item na openList
+												//o item está na listaAberta nós precisamos alterar o custo F 
+												//gravado no item e sua posição na listaAberta para ter certeza 
+												//que nós mantemos uma listaAberta corretamente ordenada.
+												for (int x = 1; x <= numItemsListaAberta; x++) //olho para o item na listaAberta
 												{
-													if (openX[openList[x]] == a && openY[openList[x]] == b) //item encontrado
+													if (openX[listaAberta[x]] == a && openY[listaAberta[x]] == b) //item encontrado
 													{
-														Fcost[openList[x]] = Gcost[a][b] + Hcost[openList[x]];//troque o custo F
+														Fcost[listaAberta[x]] = Gcost[a][b] + Hcost[listaAberta[x]];//troque o custo F
 
 														//Veja se alterando o bubbles score de F do item a cima da sua localização corrente na heap.
 														m = x;
 														while (m != 1) //Enquanto o item não foi borbulhado para o topo (m = 1).	
 														{
 															//Verifique se o filho é < pai. Se for, troque-os.
-															if (Fcost[openList[m]] < Fcost[openList[m/2]])
+															if (Fcost[listaAberta[m]] < Fcost[listaAberta[m/2]])
 															{
-																temp = openList[m/2];
-																openList[m/2] = openList[m];
-																openList[m] = temp;
+																temp = listaAberta[m/2];
+																listaAberta[m/2] = listaAberta[m];
+																listaAberta[m] = temp;
 																m = m/2;
 															}
 															else
 																break;
 														} 
 														break; //saia para x = loop
-													} //Se openX(openList(x)) = a
-												} //For x = 1 To numberOfOpenListItems
+													} //Se openX(listaAberta(x)) = a
+												} //For x = 1 To numItemsListaAberta
 											}//If tempGcost < Gcost(a,b)
 
-										}//else If whichList(a,b) = onOpenList	
+										}//else If whichList(a,b) = naListaAberta	
 									}//If não cortando um canto
 								}//If não um quadrado parede.
 							}//If não já está na closedList 
@@ -742,16 +742,16 @@ public class AStar {
 					}//for (a = parentXval-1; a <= parentXval+1; a++){
 				}//for (b = parentYval-1; b <= parentYval+1; b++){
 
-			}//if (numberOfOpenListItems != 0)
+			}//if (numItemsListaAberta != 0)
 
-			//9. Se a openList está vazia então não existe um caminho.
+			//9. Se a listaAberta está vazia então não existe um caminho.
 			else
 			{
 				path = naoExiste; break;
 			}  
 
-			//Se o alvo é adicionado a openList, então o caminho foi encontrado.
-			if (whichList[targetX][targetY] == onOpenList)
+			//Se o alvo é adicionado a listaAberta, então o caminho foi encontrado.
+			if (whichList[targetX][targetY] == naListaAberta)
 			{
 				path = encontrado; break;
 			}

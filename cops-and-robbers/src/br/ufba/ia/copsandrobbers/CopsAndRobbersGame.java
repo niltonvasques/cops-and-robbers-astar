@@ -146,7 +146,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		for (int x = 0; x <= 79; x++){
 			for (int y = 0; y <= 59; y++){
 			//Draw blue walls
-			if (aStar.walkability[x][y] == aStar.caminhoBloqueado) {
+			if (aStar.espacoDeCaminhada[x][y] == aStar.caminhoBloqueado) {
 				pixmap.fillRectangle(x*AStar.tamanhoPixel,y*AStar.tamanhoPixel,AStar.tamanhoPixel,AStar.tamanhoPixel);
 			}
 		}}		
@@ -187,7 +187,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			
 			int x = ((int)touchPos.x)/AStar.tamanhoPixel;
 			int y = ((int)touchPos.y)/AStar.tamanhoPixel;
-			aStar.walkability[x][y] = (char)(1-aStar.walkability[x][y]);
+			aStar.espacoDeCaminhada[x][y] = (char)(1-aStar.espacoDeCaminhada[x][y]);
 		}
 	}
 	
@@ -215,8 +215,8 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			{
 				for (int x = 0; x <= 79; x++){
 					for (int y = 0; y <= 59; y++){
-						aStar.walkability [x][y] = (char)reader.read();
-					if (aStar.walkability [x][y] > 1) aStar.walkability [x][y] = 0;
+						aStar.espacoDeCaminhada [x][y] = (char)reader.read();
+					if (aStar.espacoDeCaminhada [x][y] > 1) aStar.espacoDeCaminhada [x][y] = 0;
 				}}
 				reader.close();
 			}
@@ -224,7 +224,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			{
 				for (int x = 0; x <= 79; x++){
 					for (int y = 0; y <= 59; y++){
-						aStar.walkability [x][y] = (char)aStar.caminhoPassavel;
+						aStar.espacoDeCaminhada [x][y] = (char)aStar.caminhoPassavel;
 				}}
 			}
 		} catch (FileNotFoundException e) {
