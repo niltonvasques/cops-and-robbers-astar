@@ -18,7 +18,7 @@
 		<link>
 			<name>assets</name>
 			<type>2</type>
-			<location>/media/home/niltonvasques/Documents/UFBA/Inteligencia Artificial/trab1-ia-ufba-2014/cops-and-robbers-android/assets</location>
+			<location>/home/niltonvasques/trab1-ia-ufba-2014/cops-and-robbers-android/assets</location>
 		</link>
 	</linkedResources>
 </projectDescription>

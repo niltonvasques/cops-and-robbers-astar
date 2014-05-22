@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -140,8 +139,9 @@ public class CopsAndRobbersGame implements ApplicationListener {
 	//-----------------------------------------------------------------------------
 	void CreateMapImage(){
 		Pixmap pixmap = new Pixmap(1024, 1024, Format.RGB888);
-		
-		pixmap.setColor(Color.BLUE);
+		pixmap.setColor(Color.WHITE);
+		pixmap.fill();
+		pixmap.setColor(Color.GRAY);
 //		Color(0,0,255);//set default color to blue
 		for (int x = 0; x <= 79; x++){
 			for (int y = 0; y <= 59; y++){
@@ -264,12 +264,17 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		{
 		//If no path has been generated, generate one. Update it when
 		//the chaser reaches its fifth step on the current path.	
-		if (aStar.pathStatus[ID] == AStar.notStarted || aStar.pathLocation[ID] == 5)
+		if (aStar.pathStatus[ID] == AStar.notStarted || aStar.pathLocation[ID] == 10)
 		{
 			//Generate a new path. Enter coordinates of smiley sprite (xLoc(1)/
 			//yLoc(1)) as the target.
-			aStar.pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],
-				xLoc[targetID],yLoc[targetID]);
+			if(ID == 2){
+				aStar.pathStatus[ID] = aStar.FindPath(ID,xLoc[ID],yLoc[ID],
+						xLoc[targetID],yLoc[targetID]);
+			}else{
+				aStar.pathStatus[ID] = aStar.FindPathBuscaCega(ID,xLoc[ID],yLoc[ID],
+					xLoc[targetID],yLoc[targetID]);
+			}
 			
 		}} 
 
