@@ -22,7 +22,7 @@ public class AStar {
 	public int naListaFechada = 10;
 
 	//Create needed arrays
-	public char[][] espacoDeCaminhada = new char[larguraTela][alturaTela];
+	public char[][] possibilidadeDeCaminhada = new char[larguraTela][alturaTela];
 	public int[] listaAberta = new int[larguraTela*alturaTela+2]; //array de 1 dimensão que segunda uma lista aberta de items
 	public int[][] queLista = new int[larguraTela+1][alturaTela+1];  //array de 2 dimensões usado para gravar  
 	// 		se uma célula está na lista aberta ou na lista fechada.
@@ -80,7 +80,7 @@ public class AStar {
 			return naoExiste;
 
 		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
-		if (espacoDeCaminhada[targetX][targetY] == caminhoBloqueado)
+		if (possibilidadeDeCaminhada[targetX][targetY] == caminhoBloqueado)
 		{
 			caminhoX[pathfinderID] = startingX;
 			caminhoY[pathfinderID] = startingY;
@@ -180,7 +180,7 @@ public class AStar {
 							if (queLista[a][b] != naListaFechada) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
-								if (espacoDeCaminhada [a][b] != caminhoBloqueado) { 
+								if (possibilidadeDeCaminhada [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
 									corner = caminhoPassavel;	
@@ -188,12 +188,12 @@ public class AStar {
 									{
 										if (b == valorYPai-1)
 										{
-											if (espacoDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || espacoDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  corner = caminhoBloqueado;
+											if (possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  corner = caminhoBloqueado;
 										}
 										else if (b == valorYPai+1)
 										{
-											if (espacoDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado
-													|| espacoDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado) 
+											if (possibilidadeDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado
+													|| possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado) 
 												corner = caminhoBloqueado; 
 										}
 									}
@@ -201,14 +201,14 @@ public class AStar {
 									{
 										if (b == valorYPai-1)
 										{
-											if (espacoDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado 
-													|| espacoDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado) 
+											if (possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado 
+													|| possibilidadeDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado) 
 												corner = caminhoBloqueado;
 										}
 										else if (b == valorYPai+1)
 										{
-											if (espacoDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado 
-													|| espacoDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado)
+											if (possibilidadeDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado 
+													|| possibilidadeDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado)
 												corner = caminhoBloqueado; 
 										}
 									}	
@@ -502,7 +502,7 @@ public class AStar {
 			return naoExiste;
 
 		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
-		if (espacoDeCaminhada[targetX][targetY] == caminhoBloqueado)
+		if (possibilidadeDeCaminhada[targetX][targetY] == caminhoBloqueado)
 		{
 			caminhoX[pathfinderID] = startingX;
 			caminhoY[pathfinderID] = startingY;
@@ -602,7 +602,7 @@ public class AStar {
 							if (queLista[a][b] != naListaFechada) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
-								if (espacoDeCaminhada [a][b] != caminhoBloqueado) { 
+								if (possibilidadeDeCaminhada [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
 									corner = caminhoPassavel;	
@@ -610,12 +610,12 @@ public class AStar {
 									{
 										if (b == valorYPai-1)
 										{
-											if (espacoDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || espacoDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  corner = caminhoBloqueado;
+											if (possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  corner = caminhoBloqueado;
 										}
 										else if (b == valorYPai+1)
 										{
-											if (espacoDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado
-													|| espacoDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado) 
+											if (possibilidadeDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado
+													|| possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado) 
 												corner = caminhoBloqueado; 
 										}
 									}
@@ -623,14 +623,14 @@ public class AStar {
 									{
 										if (b == valorYPai-1)
 										{
-											if (espacoDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado 
-													|| espacoDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado) 
+											if (possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado 
+													|| possibilidadeDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado) 
 												corner = caminhoBloqueado;
 										}
 										else if (b == valorYPai+1)
 										{
-											if (espacoDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado 
-													|| espacoDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado)
+											if (possibilidadeDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado 
+													|| possibilidadeDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado)
 												corner = caminhoBloqueado; 
 										}
 									}	
