@@ -24,7 +24,7 @@ public class AStar {
 	//Create needed arrays
 	public char[][] possibilidadeDeCaminhada = new char[larguraTela][alturaTela];
 	public int[] listaAberta = new int[larguraTela*alturaTela+2]; //array de 1 dimensão que segunda uma lista aberta de items
-	public int[][] queLista = new int[larguraTela+1][alturaTela+1];  //array de 2 dimensões usado para gravar  
+	public int[][] qualLista = new int[larguraTela+1][alturaTela+1];  //array de 2 dimensões usado para gravar  
 	// 		se uma célula está na lista aberta ou na lista fechada.
 	public int[] xAberta = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição x de um item na lista aberta.
 	public int[] yAberta = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição y de um item na lista aberta.
@@ -60,30 +60,30 @@ public class AStar {
 		}
 	}
 
-	public int encontrarCaminho(int pathfinderID, int startingX, int startingY,
-			int targetX, int targetY)
+	public int encontrarCaminho(int caminhoBuscadorID, int origemX, int origemY,
+			int destinoX, int destinoY)
 	{
-		int naListaAberta=0, valorXPai=0, valorYPai=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, adicionadoCustoG=0, custoGTemp = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
+		int naListaAberta=0, valorXPai=0, valorYPai=0, a=0, b=0, m=0, u=0, v=0, temp=0, diagonal=0, numItemsListaAberta=0, adicionadoCustoG=0, custoGTemp = 0, path = 0, tempx, tragetoriaX, tragetoriaY, posicaoDaCelula, novoIDItemListaAberta=0;
 
 		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de espacoDeCaminhada.
-		int startX = startingX/tamanhoPixel;
-		int startY = startingY/tamanhoPixel;	
-		targetX = targetX/tamanhoPixel;
-		targetY = targetY/tamanhoPixel;
+		int inicioX = origemX/tamanhoPixel;
+		int inicioY = origemY/tamanhoPixel;	
+		destinoX = destinoX/tamanhoPixel;
+		destinoY = destinoY/tamanhoPixel;
 
 		//2. Caminhos rápidos: Sobre certas circunstâncias, nenhum caminho é necessário.
 
 		// Se a posição inicial e o destino estão na mesmo lugar
-		if (startX == targetX && startY == targetY && localizacaoDoCaminho[pathfinderID] > 0)
+		if (inicioX == destinoX && inicioY == destinoY && localizacaoDoCaminho[caminhoBuscadorID] > 0)
 			return encontrado;
-		if (startX == targetX && startY == targetY && localizacaoDoCaminho[pathfinderID] == 0)
+		if (inicioX == destinoX && inicioY == destinoY && localizacaoDoCaminho[caminhoBuscadorID] == 0)
 			return naoExiste;
 
 		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
-		if (possibilidadeDeCaminhada[targetX][targetY] == caminhoBloqueado)
+		if (possibilidadeDeCaminhada[destinoX][destinoY] == caminhoBloqueado)
 		{
-			caminhoX[pathfinderID] = startingX;
-			caminhoY[pathfinderID] = startingY;
+			caminhoX[caminhoBuscadorID] = origemX;
+			caminhoY[caminhoBuscadorID] = origemY;
 			return naoExiste;
 		}
 
@@ -92,22 +92,22 @@ public class AStar {
 		{
 			for (int x = 0; x < larguraTela; x++) {
 				for (int y = 0; y < alturaTela; y++)
-					queLista [x][y] = 0;
+					qualLista [x][y] = 0;
 			}
 			naListaFechada = 10;	
 		}
 		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list eh mais rapida do que redimensionar queLista() array;
 		naListaAberta = naListaFechada-1;
-		tamanhoDoCaminho [pathfinderID] = naoComecou;//i.e, = 0
-		localizacaoDoCaminho [pathfinderID] = naoComecou;//i.e, = 0
-		custoG[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
+		tamanhoDoCaminho [caminhoBuscadorID] = naoComecou;//i.e, = 0
+		localizacaoDoCaminho [caminhoBuscadorID] = naoComecou;//i.e, = 0
+		custoG[inicioX][inicioY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posicao inicial listaAberta de quadrados para serem verificados.
 		numItemsListaAberta = 1;
 		listaAberta[1] = 1;		//colocando este como o item do topo(e atualmente somente) da listaAberta, que eh mantida como uma heap binaria.
 
-		xAberta[1] = startX;
-		yAberta[1] = startY;
+		xAberta[1] = inicioX;
+		yAberta[1] = inicioY;
 
 		//5. Faca o seguinte ate que um caminho eh encontrador ou ele nao exista.
 		do
@@ -121,7 +121,7 @@ public class AStar {
 				//7. Remova o primeiro item da listaAberta.
 				valorXPai = xAberta[listaAberta[1]];
 				valorYPai = yAberta[listaAberta[1]]; //Grave as coordenadas da celula do item
-				queLista[valorXPai][valorYPai] = naListaFechada;//adicione o item para a closedList
+				qualLista[valorXPai][valorYPai] = naListaFechada;//adicione o item para a closedList
 
 				//listaAberta = Heap binária: Delete este item da listaAberta, que é mantido como uma heap binária. Para mais informações veja:
 				// http://www.policyalmanac.org/games/binaryHeaps.htm
@@ -177,24 +177,24 @@ public class AStar {
 						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
 
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
-							if (queLista[a][b] != naListaFechada) { 
+							if (qualLista[a][b] != naListaFechada) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
 								if (possibilidadeDeCaminhada [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
-									corner = caminhoPassavel;	
+									diagonal = caminhoPassavel;	
 									if (a == valorXPai-1) 
 									{
 										if (b == valorYPai-1)
 										{
-											if (possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  corner = caminhoBloqueado;
+											if (possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  diagonal = caminhoBloqueado;
 										}
 										else if (b == valorYPai+1)
 										{
 											if (possibilidadeDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado
 													|| possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado) 
-												corner = caminhoBloqueado; 
+												diagonal = caminhoBloqueado; 
 										}
 									}
 									else if (a == valorXPai+1)
@@ -203,19 +203,19 @@ public class AStar {
 										{
 											if (possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado 
 													|| possibilidadeDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado) 
-												corner = caminhoBloqueado;
+												diagonal = caminhoBloqueado;
 										}
 										else if (b == valorYPai+1)
 										{
 											if (possibilidadeDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado 
 													|| possibilidadeDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado)
-												corner = caminhoBloqueado; 
+												diagonal = caminhoBloqueado; 
 										}
 									}	
-									if (corner == caminhoPassavel) {
+									if (diagonal == caminhoPassavel) {
 
 										//		Se não já está na listaAberta, adicione este para a listaAberta.			
-										if (queLista[a][b] != naListaAberta) 
+										if (qualLista[a][b] != naListaAberta) 
 										{	
 
 											//Cria um item novo na listaAberta na heap binaria.
@@ -233,7 +233,7 @@ public class AStar {
 											custoG[a][b] = custoG[valorXPai][valorYPai] + adicionadoCustoG;
 
 											//Calcular os custos H e F e o pai
-											custoH[listaAberta[m]] = AStar.tamanhoPixel*(Math.abs(a - targetX) + Math.abs(b - targetY));
+											custoH[listaAberta[m]] = AStar.tamanhoPixel*(Math.abs(a - destinoX) + Math.abs(b - destinoY));
 											custoF[listaAberta[m]] = custoG[a][b] + custoH[listaAberta[m]];
 											xPai[a][b] = valorXPai ; yPai[a][b] = valorYPai;	
 
@@ -257,7 +257,7 @@ public class AStar {
 											numItemsListaAberta = numItemsListaAberta+1;//Adicione um para o número de items na heap
 
 											//Troque queLista para mostrar que o novo item está na listaAberta.
-											queLista[a][b] = naListaAberta;
+											qualLista[a][b] = naListaAberta;
 										}
 
 										//8.If adjacent cell is already on the open list, check to see if this
@@ -329,7 +329,7 @@ public class AStar {
 			}  
 
 			//Se o alvo é adicionado a listaAberta, então o caminho foi encontrado.
-			if (queLista[targetX][targetY] == naListaAberta)
+			if (qualLista[destinoX][destinoY] == naListaAberta)
 			{
 				path = encontrado; break;
 			}
@@ -343,55 +343,55 @@ public class AStar {
 
 			//a. Trabalhando para trás do alvo para a posição inicial, verificando 
 			//		cada célula pai, calcular o tamanho do caminho.
-			pathX = targetX; pathY = targetY;
+			tragetoriaX = destinoX; tragetoriaY = destinoY;
 			do
 			{
 				//Visitar o pai da célula corrente.
-				tempx = xPai[pathX][pathY];		
-				pathY = yPai[pathX][pathY];
-				pathX = tempx;
+				tempx = xPai[tragetoriaX][tragetoriaY];		
+				tragetoriaY = yPai[tragetoriaX][tragetoriaY];
+				tragetoriaX = tempx;
 
 				//Calcular o tamanho do caminho.
-				tamanhoDoCaminho[pathfinderID] = tamanhoDoCaminho[pathfinderID] + 1;
+				tamanhoDoCaminho[caminhoBuscadorID] = tamanhoDoCaminho[caminhoBuscadorID] + 1;
 			}
-			while (pathX != startX || pathY != startY);
+			while (tragetoriaX != inicioX || tragetoriaY != inicioY);
 
 			//b.Redimensione o dataBank para o correto tamanho em bytes.
-			Integer[] arr = arquivaCaminho2.get(pathfinderID);
-			arquivaCaminho2.set(pathfinderID, Arrays.copyOf(arr, tamanhoDoCaminho[pathfinderID]*8));
+			Integer[] arr = arquivaCaminho2.get(caminhoBuscadorID);
+			arquivaCaminho2.set(caminhoBuscadorID, Arrays.copyOf(arr, tamanhoDoCaminho[caminhoBuscadorID]*8));
 
 			//c. Agora copie as informações do caminho sobre o databank. Desde que 
 			//		nós estamos trabahando atrás do alvo para da posição inicial, nós
 			//		copiamos a informação para o data bank na ordem reversa. O resultado é
 			//		um conjunto corretamente ordenado de dados do caminho, para o primeiro passo
 			//		até o último.
-			pathX = targetX ; pathY = targetY;
-			cellPosition = tamanhoDoCaminho[pathfinderID]*2;//Inicie do final	
+			tragetoriaX = destinoX ; tragetoriaY = destinoY;
+			posicaoDaCelula = tamanhoDoCaminho[caminhoBuscadorID]*2;//Inicie do final	
 			do
 			{
-				cellPosition = cellPosition - 2;//trabalhe 2 inteiros para trás
-				arquivaCaminho2.get(pathfinderID)[cellPosition] = pathX;
-				arquivaCaminho2.get(pathfinderID)[cellPosition+1] = pathY;
+				posicaoDaCelula = posicaoDaCelula - 2;//trabalhe 2 inteiros para trás
+				arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula] = tragetoriaX;
+				arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula+1] = tragetoriaY;
 	
 				//d. Visite o pai da célula atual.
-				tempx = xPai[pathX][pathY];		
-				pathY = yPai[pathX][pathY];
-				pathX = tempx;
+				tempx = xPai[tragetoriaX][tragetoriaY];		
+				tragetoriaY = yPai[tragetoriaX][tragetoriaY];
+				tragetoriaX = tempx;
 
 				//e. Se nós temos encontrado o quadrado incial, saia do loop.
 			}
-			while (pathX != startX || pathY != startY);	
+			while (tragetoriaX != inicioX || tragetoriaY != inicioY);	
 
 			//11. Leia o primeiro passo dentro dos arrays caminhoX/caminhoY. 
-			ReadPath(pathfinderID,startingX,startingY,1);
+			leituraDoCaminho(caminhoBuscadorID,origemX,origemY,1);
 
 		}
 		return path;
 	}
 
-	public void ReadPath (int pathfinderID,int currentX,int currentY, int pixelsPerFrame)
+	public void leituraDoCaminho(int caminhoBuscadorID,int correnteX,int correnteY, int pixelPorFrame)
 	{
-		int ID = pathfinderID; //redundante, mas faz que o seguinte seja mais fácil para ler.
+		int ID = caminhoBuscadorID; //redundante, mas faz que o seguinte seja mais fácil para ler.
 		//Se um caminho tem sido encontrado para o pathfinder ...
 		if (statusDoCaminho[ID] == encontrado)
 		{
@@ -402,19 +402,19 @@ public class AStar {
 			{
 				//Se apenas começando ou se está fechado para o centro do quadrado
 				if (localizacaoDoCaminho[ID] == 0 || 
-						(Math.abs(currentX - caminhoX[ID]) < pixelsPerFrame && Math.abs(currentY - caminhoY[ID]) < pixelsPerFrame))
+						(Math.abs(correnteX - caminhoX[ID]) < pixelPorFrame && Math.abs(correnteY - caminhoY[ID]) < pixelPorFrame))
 					localizacaoDoCaminho[ID] = localizacaoDoCaminho[ID] + 1;
 			}
 
 			//Leia o dado do caminho.
-			caminhoX[ID] = ReadPathX(ID,localizacaoDoCaminho[ID]);
-			caminhoY[ID] = ReadPathY(ID,localizacaoDoCaminho[ID]);
+			caminhoX[ID] = leituraCaminhoX(ID,localizacaoDoCaminho[ID]);
+			caminhoY[ID] = leituraCaminhoY(ID,localizacaoDoCaminho[ID]);
 
 			//Se o centro do último quadrado caminho no caminho tem sido alcançado resete-o.
 			if (localizacaoDoCaminho[ID] == tamanhoDoCaminho[ID]) 
 			{
-				if (Math.abs(currentX - caminhoX[ID]) < pixelsPerFrame 
-						&& Math.abs(currentY - caminhoY[ID]) < pixelsPerFrame) //Se perto o suficiente do quadrado do centro
+				if (Math.abs(correnteX - caminhoX[ID]) < pixelPorFrame 
+						&& Math.abs(correnteY - caminhoY[ID]) < pixelPorFrame) //Se perto o suficiente do quadrado do centro
 					statusDoCaminho[ID] = naoComecou; 
 			}
 		}
@@ -422,8 +422,8 @@ public class AStar {
 		//Se não tem caminho para este pathfinder, simplismente fique na posição inicial.
 		else
 		{	
-			caminhoX[ID] = currentX;
-			caminhoY[ID] = currentY;
+			caminhoX[ID] = correnteX;
+			caminhoY[ID] = correnteY;
 		}
 	}
 
@@ -441,14 +441,14 @@ public class AStar {
 	// Name: ReadPathX
 	// Desc: Le a coordenada x do próximo passo do caminho
 	//-----------------------------------------------------------------------------
-	int ReadPathX(int pathfinderID,int localizacaoDoCaminho)
+	int leituraCaminhoX(int caminhoBuscadorID,int localizacaoDoCaminho)
 	{
 		int x = 0;
-		if (localizacaoDoCaminho <= tamanhoDoCaminho[pathfinderID])
+		if (localizacaoDoCaminho <= tamanhoDoCaminho[caminhoBuscadorID])
 		{
 
 			//Le a coordenada X do patharquivaCaminho
-			x = arquivaCaminho2.get(pathfinderID)[localizacaoDoCaminho*2-2];
+			x = arquivaCaminho2.get(caminhoBuscadorID)[localizacaoDoCaminho*2-2];
 
 			//Ajusta a coordenada para ela ficar alinhada ao inicio do quadrado. 
 			//Assumindo que estamos usando sprites que não são centralizados..
@@ -464,15 +464,15 @@ public class AStar {
 	// Name: ReadPathY
 	// Desc: Le a coordenada y do próximo passo do caminho
 	//-----------------------------------------------------------------------------
-	int ReadPathY(int pathfinderID,int localizacaoDoCaminho)
+	int leituraCaminhoY(int caminhoBuscadorID,int localizacaoDoCaminho)
 	{
 		int y = 0;
-		if (localizacaoDoCaminho <= tamanhoDoCaminho[pathfinderID])
+		if (localizacaoDoCaminho <= tamanhoDoCaminho[caminhoBuscadorID])
 		{
 
 			//Le as coordenadas do arquivaCaminho.
 			//		y = arquivaCaminho[pathfinderID].get(localizacaoDoCaminho*2-1);
-			y = arquivaCaminho2.get(pathfinderID)[localizacaoDoCaminho*2-1];
+			y = arquivaCaminho2.get(caminhoBuscadorID)[localizacaoDoCaminho*2-1];
 
 			//Ajusta a coordenada para ela ficar alinhada ao inicio do quadrado. 
 			//Assumindo que estamos usando sprites que não são centralizados..
@@ -482,30 +482,30 @@ public class AStar {
 		return y;
 	}
 	
-	public int encontrarCaminhoBuscaCega (int pathfinderID, int startingX, int startingY,
-			int targetX, int targetY)
+	public int encontrarCaminhoBuscaCega(int caminhoBuscadorID, int origemX, int origemY,
+			int destinoX, int destinoY)
 	{
-		int naListaAberta=0, valorXPai=0, valorYPai=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numItemsListaAberta=0, adicionadoCustoG=0, custoGTemp = 0, path = 0, tempx, pathX, pathY, cellPosition, novoIDItemListaAberta=0;
+		int naListaAberta=0, valorXPai=0, valorYPai=0, a=0, b=0, m=0, u=0, v=0, temp=0, diagonal=0, numItemsListaAberta=0, adicionadoCustoG=0, custoGTemp = 0, caminho = 0, tempx, tragetoriaX, tragetoriaY, posicaoDaCelula, novoIDItemListaAberta=0;
 
 		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de espacoDeCaminhada.
-		int startX = startingX/tamanhoPixel;
-		int startY = startingY/tamanhoPixel;	
-		targetX = targetX/tamanhoPixel;
-		targetY = targetY/tamanhoPixel;
+		int inicioX = origemX/tamanhoPixel;
+		int inicioY = origemY/tamanhoPixel;	
+		destinoX = destinoX/tamanhoPixel;
+		destinoY = destinoY/tamanhoPixel;
 
 		//2. Caminhos rápidos: Sobre certas circunstâncias, nenhum caminho é necessário.
 
 		// Se a posição inicial e o destino estão na mesmo lugar
-		if (startX == targetX && startY == targetY && localizacaoDoCaminho[pathfinderID] > 0)
+		if (inicioX == destinoX && inicioY == destinoY && localizacaoDoCaminho[caminhoBuscadorID] > 0)
 			return encontrado;
-		if (startX == targetX && startY == targetY && localizacaoDoCaminho[pathfinderID] == 0)
+		if (inicioX == destinoX && inicioY == destinoY && localizacaoDoCaminho[caminhoBuscadorID] == 0)
 			return naoExiste;
 
 		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
-		if (possibilidadeDeCaminhada[targetX][targetY] == caminhoBloqueado)
+		if (possibilidadeDeCaminhada[destinoX][destinoY] == caminhoBloqueado)
 		{
-			caminhoX[pathfinderID] = startingX;
-			caminhoY[pathfinderID] = startingY;
+			caminhoX[caminhoBuscadorID] = origemX;
+			caminhoY[caminhoBuscadorID] = origemY;
 			return naoExiste;
 		}
 
@@ -514,22 +514,22 @@ public class AStar {
 		{
 			for (int x = 0; x < larguraTela; x++) {
 				for (int y = 0; y < alturaTela; y++)
-					queLista [x][y] = 0;
+					qualLista [x][y] = 0;
 			}
 			naListaFechada = 10;	
 		}
 		naListaFechada = naListaFechada+2; //alterando os valores da listaAberta(lista aberta) e onClosed list é mais rapida do que redimming queLista() array;
 		naListaAberta = naListaFechada-1;
-		tamanhoDoCaminho [pathfinderID] = naoComecou;//i.e, = 0
-		localizacaoDoCaminho [pathfinderID] = naoComecou;//i.e, = 0
-		custoG[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
+		tamanhoDoCaminho [caminhoBuscadorID] = naoComecou;//i.e, = 0
+		localizacaoDoCaminho [caminhoBuscadorID] = naoComecou;//i.e, = 0
+		custoG[inicioX][inicioY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posição inicial listaAberta de quadrados para serem verificados.
 		numItemsListaAberta = 1;
 		listaAberta[1] = 1;		//colocando este como o item do topo(e atualmente somente) da listaAberta, que é mantida como uma heap binaria.
 
-		xAberta[1] = startX;
-		yAberta[1] = startY;
+		xAberta[1] = inicioX;
+		yAberta[1] = inicioY;
 
 		//5. Faça o seguinte até que um caminho é encontrador ou ele não exista.
 		do
@@ -543,7 +543,7 @@ public class AStar {
 				//7. Remova o primeiro item da listaAberta.
 				valorXPai = xAberta[listaAberta[1]];
 				valorYPai = yAberta[listaAberta[1]]; //Grave as coordenadas da celula do item
-				queLista[valorXPai][valorYPai] = naListaFechada;//adicione o item para a closedList
+				qualLista[valorXPai][valorYPai] = naListaFechada;//adicione o item para a closedList
 
 				//listaAberta = Heap binária: Delete este item da listaAberta, que é mantido como uma heap binária. Para mais informações veja:
 				// http://www.policyalmanac.org/games/binaryHeaps.htm
@@ -599,24 +599,24 @@ public class AStar {
 						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
 
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
-							if (queLista[a][b] != naListaFechada) { 
+							if (qualLista[a][b] != naListaFechada) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
 								if (possibilidadeDeCaminhada [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
-									corner = caminhoPassavel;	
+									diagonal = caminhoPassavel;	
 									if (a == valorXPai-1) 
 									{
 										if (b == valorYPai-1)
 										{
-											if (possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  corner = caminhoBloqueado;
+											if (possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado || possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado)  diagonal = caminhoBloqueado;
 										}
 										else if (b == valorYPai+1)
 										{
 											if (possibilidadeDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado
 													|| possibilidadeDeCaminhada[valorXPai-1][valorYPai] == caminhoBloqueado) 
-												corner = caminhoBloqueado; 
+												diagonal = caminhoBloqueado; 
 										}
 									}
 									else if (a == valorXPai+1)
@@ -625,19 +625,19 @@ public class AStar {
 										{
 											if (possibilidadeDeCaminhada[valorXPai][valorYPai-1] == caminhoBloqueado 
 													|| possibilidadeDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado) 
-												corner = caminhoBloqueado;
+												diagonal = caminhoBloqueado;
 										}
 										else if (b == valorYPai+1)
 										{
 											if (possibilidadeDeCaminhada[valorXPai+1][valorYPai] == caminhoBloqueado 
 													|| possibilidadeDeCaminhada[valorXPai][valorYPai+1] == caminhoBloqueado)
-												corner = caminhoBloqueado; 
+												diagonal = caminhoBloqueado; 
 										}
 									}	
-									if (corner == caminhoPassavel) {
+									if (diagonal == caminhoPassavel) {
 
 										//		Se não já está na listaAberta, adicione este para a listaAberta.			
-										if (queLista[a][b] != naListaAberta) 
+										if (qualLista[a][b] != naListaAberta) 
 										{	
 
 											//Cria um item novo na listaAberta na heap binaria.
@@ -679,7 +679,7 @@ public class AStar {
 											numItemsListaAberta = numItemsListaAberta+1;//Adicione um para o número de items na heap
 
 											//Troque queLista para mostrar que o novo item está na listaAberta.
-											queLista[a][b] = naListaAberta;
+											qualLista[a][b] = naListaAberta;
 										}
 
 										//8.If adjacent cell is already on the open list, check to see if this
@@ -747,68 +747,68 @@ public class AStar {
 			//9. Se a listaAberta está vazia então não existe um caminho.
 			else
 			{
-				path = naoExiste; break;
+				caminho = naoExiste; break;
 			}  
 
 			//Se o alvo é adicionado a listaAberta, então o caminho foi encontrado.
-			if (queLista[targetX][targetY] == naListaAberta)
+			if (qualLista[destinoX][destinoY] == naListaAberta)
 			{
-				path = encontrado; break;
+				caminho = encontrado; break;
 			}
 
 		}
 		while (true);//Faça o seguinte até que o caminho seja encontrado ou ele não exista.
 
 		//10. Salve o caminho se ele não exista.
-		if (path == encontrado)
+		if (caminho == encontrado)
 		{
 
 			//a. Trabalhando para trás do alvo para a posição inicial, verificando 
 			//		cada célula pai, calcular o tamanho do caminho.
-			pathX = targetX; pathY = targetY;
+			tragetoriaX = destinoX; tragetoriaY = destinoY;
 			do
 			{
 				//Visitar o pai da célula corrente.
-				tempx = xPai[pathX][pathY];		
-				pathY = yPai[pathX][pathY];
-				pathX = tempx;
+				tempx = xPai[tragetoriaX][tragetoriaY];		
+				tragetoriaY = yPai[tragetoriaX][tragetoriaY];
+				tragetoriaX = tempx;
 
 				//Calcular o tamanho do caminho.
-				tamanhoDoCaminho[pathfinderID] = tamanhoDoCaminho[pathfinderID] + 1;
+				tamanhoDoCaminho[caminhoBuscadorID] = tamanhoDoCaminho[caminhoBuscadorID] + 1;
 			}
-			while (pathX != startX || pathY != startY);
+			while (tragetoriaX != inicioX || tragetoriaY != inicioY);
 
 			//b.Redimensione o dataBank para o correto tamanho em bytes.
-			Integer[] arr = arquivaCaminho2.get(pathfinderID);
-			arquivaCaminho2.set(pathfinderID, Arrays.copyOf(arr, tamanhoDoCaminho[pathfinderID]*8));
+			Integer[] arr = arquivaCaminho2.get(caminhoBuscadorID);
+			arquivaCaminho2.set(caminhoBuscadorID, Arrays.copyOf(arr, tamanhoDoCaminho[caminhoBuscadorID]*8));
 
 			//c. Agora copie as informações do caminho sobre o databank. Desde que 
 			//		nós estamos trabahando atrás do alvo para da posição inicial, nós
 			//		copiamos a informação para o data bank na ordem reversa. O resultado é
 			//		um conjunto corretamente ordenado de dados do caminho, para o primeiro passo
 			//		até o último.
-			pathX = targetX ; pathY = targetY;
-			cellPosition = tamanhoDoCaminho[pathfinderID]*2;//Inicie do final	
+			tragetoriaX = destinoX ; tragetoriaY = destinoY;
+			posicaoDaCelula = tamanhoDoCaminho[caminhoBuscadorID]*2;//Inicie do final	
 			do
 			{
-				cellPosition = cellPosition - 2;//trabalhe 2 inteiros para trás
-				arquivaCaminho2.get(pathfinderID)[cellPosition] = pathX;
-				arquivaCaminho2.get(pathfinderID)[cellPosition+1] = pathY;
+				posicaoDaCelula = posicaoDaCelula - 2;//trabalhe 2 inteiros para trás
+				arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula] = tragetoriaX;
+				arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula+1] = tragetoriaY;
 	
 				//d. Visite o pai da célula atual.
-				tempx = xPai[pathX][pathY];		
-				pathY = yPai[pathX][pathY];
-				pathX = tempx;
+				tempx = xPai[tragetoriaX][tragetoriaY];		
+				tragetoriaY = yPai[tragetoriaX][tragetoriaY];
+				tragetoriaX = tempx;
 
 				//e. Se nós temos encontrado o quadrado incial, saia do loop.
 			}
-			while (pathX != startX || pathY != startY);	
+			while (tragetoriaX != inicioX || tragetoriaY != inicioY);	
 
 			//11. Leia o primeiro passo dentro dos arrays caminhoX/caminhoY. 
-			ReadPath(pathfinderID,startingX,startingY,1);
+			leituraDoCaminho(caminhoBuscadorID,origemX,origemY,1);
 
 		}
-		return path;
+		return caminho;
 	}
 
 }
