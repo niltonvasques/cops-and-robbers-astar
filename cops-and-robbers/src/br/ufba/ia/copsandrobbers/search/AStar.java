@@ -525,11 +525,9 @@ public class AStar {
 		naListaAberta = naListaFechada-1;
 		tamanhoDoCaminho [caminhoBuscadorID] = naoComecou;//i.e, = 0
 		localizacaoDoCaminho [caminhoBuscadorID] = naoComecou;//i.e, = 0
-		custoG[inicioX][inicioY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posição inicial listaAberta de quadrados para serem verificados.
-		numItemsListaAberta = 1;
-		listaAberta[1] = 1;		//colocando este como o item do topo(e atualmente somente) da listaAberta, que é mantida como uma heap binaria.
+		pilha.push(1);
 
 		xAberta[1] = inicioX;
 		yAberta[1] = inicioY;
@@ -540,15 +538,12 @@ public class AStar {
 
 			//6. Se a listaAberta não é vazia, pegue a primeira célula da lista.
 			//	Esta possui o menor custo da função F na listaAberta.
-			if (numItemsListaAberta != 0)
+			if (!pilha.isEmpty())
 			{
 
 				//7. Remova o primeiro item da listaAberta.
 				valorXPai = xAberta[listaAberta[1]];
 				valorYPai = yAberta[listaAberta[1]]; //Grave as coordenadas da celula do item
-				qualLista[valorXPai][valorYPai] = naListaFechada;//adicione o item para a closedList
-
-				
 
 				//7. Verifique os quadrados adjacentes. (Estes "filhos" -- aquele caminho dos filhos são similares,
 				//conceitualmente, para a heap binaria mencionada a cima, mas não confuda eles. Eles são diferentes.
@@ -603,53 +598,34 @@ public class AStar {
 										if (qualLista[a][b] != naListaAberta) 
 										{	
 
-											//Cria um item novo na listaAberta na heap binaria.
-											novoIDItemListaAberta = novoIDItemListaAberta + 1; //Cada novo item tem um ID unico.
-											m = numItemsListaAberta+1;
+ 											//Cria um item novo na listaAberta na heap binaria.
+
+ 											novoIDItemListaAberta = novoIDItemListaAberta + 1; //Cada novo item tem um ID unico.
+ 											
+ 											pilha.push(novoIDItemListaAberta);
+
 											listaAberta[m] = novoIDItemListaAberta;// Coloque o novo item da listaAberta(atualmente ID#) na base da heap.
-											xAberta[novoIDItemListaAberta] = a;
-											yAberta[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
 
-											//Calculando o custo de G
-											if (Math.abs(a-valorXPai) == 1 && Math.abs(b-valorYPai) == 1)
-												adicionadoCustoG = 14;//custo de ir pelas diagonais dos quadrados;	
-											else	
-												adicionadoCustoG = 10;//custo de ir em não diagonais.		
-											custoG[a][b] = 1;
-
-											//Calcular os custos H e F e o pai
-											custoH[listaAberta[m]] = 1;
-											custoF[listaAberta[m]] = custoG[a][b] + custoH[listaAberta[m]];
-											xPai[a][b] = valorXPai ; yPai[a][b] = valorYPai;	
-
-											//Mover o novo item da listaAberta para o seu pŕoprio lugar na heap binária.
-											//Iniciando da base, sucessivamente comparar items pais, 
-											//trocando quando necessário até que o item encontre seu lugar na heap.
-											//ou borbulhando todos os caminhos para o topo (se este tem o menor custo de F).
-											while (m != 1) //Enquanto o item não tem sido borbulhado para o topo(m=1)	
-											{
-												//Verifique se o custo F do filho é < o custo F do pai. Se for, troque-os.
-												if (custoF[listaAberta[m]] <= custoF[listaAberta[m/2]])
-												{
-													temp = listaAberta[m/2];
-													listaAberta[m/2] = listaAberta[m];
-													listaAberta[m] = temp;
-													m = m/2;
-												}
-												else
-													break;
-											}
-											numItemsListaAberta = numItemsListaAberta+1;//Adicione um para o número de items na heap
-
-											//Troque queLista para mostrar que o novo item está na listaAberta.
-											qualLista[a][b] = naListaAberta;
+ 											xAberta[novoIDItemListaAberta] = a;
+ 											yAberta[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
+ 											
+ 											xPai[a][b] = valorXPai; 
+ 											yPai[a][b] = valorYPai;
+ 											
+ 											//Troque whichList para mostrar que o novo item está na listaAberta.
+ 											qualLista[a][b] = naListaAberta;
+ 											
+											vizinhoDisponivel = true;
 										}
-
 										
 									}//If não cortando um canto
 								}//If não um quadrado parede.
 							}//If não já está na closedList 
 						}//If não está fora do mapa.
+						if( a == valorXPai+1 && b == valorYPai+1 && !vizinhoDisponivel){
+							int item = pilha.pop();
+							qualLista[valorXPai][valorYPai] = naListaFechada;
+						}
 					}//for (a = valorXPai-1; a <= valorXPai+1; a++){
 				}//for (b = valorYPai-1; b <= valorYPai+1; b++){
 

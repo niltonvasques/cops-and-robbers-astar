@@ -87,7 +87,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		CheckUserInput();
 		//Move smiley
 		if (smileyActivated == 1) MoveSmiley();
-	
+//	
 		//Move chasers
 		if (smileyActivated == 1)  
 			for (int ID = 2; ID <= 3; ID++) 
