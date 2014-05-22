@@ -13,11 +13,7 @@ public class AStar {
 
 	//Declare constants
 	public static final int mapWidth = 80, mapHeight = 60, tileSize = 20, numberPeople = 3;
-<<<<<<< HEAD
-	public static final int notfinished = 0, notStarted = 0; // path-related constants
-=======
 	public static final int notfinished = 0, notStarted = 0; // constantes relacionadas ao caminho
->>>>>>> 15992167334a6adfc3f9f141810b43fdd7916fb8
 	public static final int found = 1, nonexistent = 2; 
 	public static final int walkable = 0, unwalkable = 1;    // constantes referente a habilidade de andar.
 	public int onClosedList = 10;
@@ -114,71 +110,9 @@ public class AStar {
 		do
 		{
 
-<<<<<<< HEAD
-		if (u != v) //if parent's F is > one of its children, swap them
-		{
-			temp = openList[u];
-			openList[u] = openList[v];
-			openList[v] = temp;			
-		}
-		else
-			break; //otherwise, exit loop
-			
-		}
-//		while (!KeyDown(27)); -> O que estava no C++... 27 = Codigo do bot�o: ESC
-		while (!(Gdx.input.isKeyPressed(Keys.ESCAPE)));  //Tentei isso, mas n�o sei como criar a vari�vel actualkey.
-
-
-	//7.    Check the adjacent squares. (Its "children" -- these path children
-	//		are similar, conceptually, to the binary heap children mentioned
-	//		above, but don't confuse them. They are different. Path children
-	//		are portrayed in Demo 1 with grey pointers pointing toward
-	//		their parents.) Add these adjacent child squares to the open list
-	//		for later consideration if appropriate (see various if statements
-	//		below).
-		for (b = parentYval-1; b <= parentYval+1; b++){
-		for (a = parentXval-1; a <= parentXval+1; a++){
-
-		// If not off the map (do this first to avoid array out-of-bounds errors)
-		if (a != -1 && b != -1 && a != mapWidth && b != mapHeight){
-
-		//		If not already on the closed list (items on the closed list have
-		//		already been considered and can now be ignored).			
-		if (whichList[a][b] != onClosedList) { 
-		
-		//		If not a wall/obstacle square.
-		if (walkability [a][b] != unwalkable) { 
-			
-		//		Don't cut across corners
-		corner = walkable;	
-		if (a == parentXval-1) 
-		{
-			if (b == parentYval-1)
-			{
-				if (walkability[parentXval-1][parentYval] == unwalkable || walkability[parentXval][parentYval-1] == unwalkable)  
-					corner = unwalkable;
-			}
-			else if (b == parentYval+1)
-			{
-				if (walkability[parentXval][parentYval+1] == unwalkable
-					|| walkability[parentXval-1][parentYval] == unwalkable) 
-					corner = unwalkable; 
-			}
-		}
-		else if (a == parentXval+1)
-		{
-			if (b == parentYval-1)
-			{
-				if (walkability[parentXval][parentYval-1] == unwalkable 
-					|| walkability[parentXval+1][parentYval] == unwalkable) 
-					corner = unwalkable;
-			}
-			else if (b == parentYval+1)
-=======
 			//6. Se a openList não é vazia, pegue a primeira célula da lista.
 			//	Esta possui o menor custo da função F na openList.
 			if (numberOfOpenListItems != 0)
->>>>>>> 15992167334a6adfc3f9f141810b43fdd7916fb8
 			{
 
 				//7. Remova o primeiro item da openList.
