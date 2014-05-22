@@ -542,8 +542,8 @@ public class AStar {
 			{
 
 				//7. Remova o primeiro item da listaAberta.
-				valorXPai = xAberta[listaAberta[1]];
-				valorYPai = yAberta[listaAberta[1]]; //Grave as coordenadas da celula do item
+				valorXPai = xAberta[pilha.peek()];
+				valorYPai = yAberta[pilha.peek()]; //Grave as coordenadas da celula do item
 
 				//7. Verifique os quadrados adjacentes. (Estes "filhos" -- aquele caminho dos filhos são similares,
 				//conceitualmente, para a heap binaria mencionada a cima, mas não confuda eles. Eles são diferentes.
@@ -603,8 +603,6 @@ public class AStar {
  											novoIDItemListaAberta = novoIDItemListaAberta + 1; //Cada novo item tem um ID unico.
  											
  											pilha.push(novoIDItemListaAberta);
-
-											listaAberta[m] = novoIDItemListaAberta;// Coloque o novo item da listaAberta(atualmente ID#) na base da heap.
 
  											xAberta[novoIDItemListaAberta] = a;
  											yAberta[novoIDItemListaAberta] = b;//grave suas coordenadas x e y do novo item
@@ -672,18 +670,18 @@ public class AStar {
 				arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula+1] = tragetoriaY;
 	
 				//d. Visite o pai da célula atual.
-				itemID = pilha.pop();
-				tragetoriaX = xAberta[itemID]; 
-				tragetoriaY = yAberta[itemID];
+//				itemID = pilha.pop();
+//				tragetoriaX = xAberta[itemID]; 
+//				tragetoriaY = yAberta[itemID];
 				
-//				tempx = xPai[tragetoriaX][tragetoriaY];		
-//				tragetoriaY = yPai[tragetoriaX][tragetoriaY];
-//				tragetoriaX = tempx;
+				tempx = xPai[tragetoriaX][tragetoriaY];		
+				tragetoriaY = yPai[tragetoriaX][tragetoriaY];
+				tragetoriaX = tempx;
 
 				//e. Se nós temos encontrado o quadrado incial, saia do loop.
 			}
-			while(!pilha.isEmpty());
-//			while (tragetoriaX != inicioX || tragetoriaY != inicioY);	
+			while (tragetoriaX != inicioX || tragetoriaY != inicioY);	
+//			while(!pilha.isEmpty());
 
 			//11. Leia o primeiro passo dentro dos arrays caminhoX/caminhoY. 
 			leituraDoCaminho(caminhoBuscadorID,origemX,origemY,1);

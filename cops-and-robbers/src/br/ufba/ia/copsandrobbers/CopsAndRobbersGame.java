@@ -277,6 +277,11 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			}
 			
 		}} 
+		
+		
+		if(ID == 3){
+			System.out.println("POLICIAL 2");
+		}
 
 	//2.Move chaser.
 		if (aStar.statusDoCaminho[ID] == AStar.encontrado) MoveSprite(ID);
