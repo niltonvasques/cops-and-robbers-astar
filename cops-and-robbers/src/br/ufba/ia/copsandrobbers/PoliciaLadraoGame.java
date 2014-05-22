@@ -200,7 +200,7 @@ public class PoliciaLadraoGame implements ApplicationListener {
 		xLoc[3] = 160 ; yLoc[3] = 320; //posição inicial do policial
 		speed[1] = 3;//velocidade do ladrão
 		speed[2] = 2;//velocidade do policial
-		speed[3] = 1;//velocidade do policial
+		speed[3] = 3;//velocidade do policial
 	}
 
 	void movePolicia(int ID){
