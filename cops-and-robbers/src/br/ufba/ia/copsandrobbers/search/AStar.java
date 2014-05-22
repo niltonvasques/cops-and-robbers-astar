@@ -483,6 +483,8 @@ public class AStar {
 		return y;
 	}
 	
+	private Stack<Integer> pilha = new Stack<Integer>();
+	
 	public int FindPathBuscaCega (int pathfinderID, int startingX, int startingY,
 			int targetX, int targetY)
 	{
