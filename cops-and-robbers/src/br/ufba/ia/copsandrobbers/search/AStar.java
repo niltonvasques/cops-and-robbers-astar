@@ -488,7 +488,10 @@ public class AStar {
 	public int encontrarCaminhoBuscaCega(int caminhoBuscadorID, int origemX, int origemY,
 			int destinoX, int destinoY)
 	{
-		int naListaAberta=0, valorXPai=0, valorYPai=0, a=0, b=0, m=0, u=0, v=0, temp=0, diagonal=0, numItemsListaAberta=0, adicionadoCustoG=0, custoGTemp = 0, caminho = 0, tempx, tragetoriaX, tragetoriaY, posicaoDaCelula, novoIDItemListaAberta=0;
+		int naListaAberta=0, valorXPai=0, valorYPai=0, a=0, b=0, m=0, u=0, v=0, 
+				temp=0, diagonal=0, numItemsListaAberta=0, adicionadoCustoG=0, 
+				custoGTemp = 0, caminho = 0, tempx, tragetoriaX, tragetoriaY, 
+				posicaoDaCelula, novoIDItemListaAberta=1;
 
 		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de espacoDeCaminhada.
 		int inicioX = origemX/tamanhoPixel;
@@ -527,10 +530,10 @@ public class AStar {
 		localizacaoDoCaminho [caminhoBuscadorID] = naoComecou;//i.e, = 0
 
 		//4. Adicionando a posição inicial listaAberta de quadrados para serem verificados.
-		pilha.push(1);
+		pilha.push(novoIDItemListaAberta);
 
-		xAberta[1] = inicioX;
-		yAberta[1] = inicioY;
+		xAberta[novoIDItemListaAberta] = inicioX;
+		yAberta[novoIDItemListaAberta] = inicioY;
 
 		//5. Faça o seguinte até que um caminho é encontrador ou ele não exista.
 		do
@@ -682,6 +685,10 @@ public class AStar {
 			}
 			while (tragetoriaX != inicioX || tragetoriaY != inicioY);	
 //			while(!pilha.isEmpty());
+			
+			posicaoDaCelula = posicaoDaCelula - 2;//trabalhe 2 inteiros para trás
+			arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula] = tragetoriaX;
+			arquivaCaminho2.get(caminhoBuscadorID)[posicaoDaCelula+1] = tragetoriaY;
 
 			//11. Leia o primeiro passo dentro dos arrays caminhoX/caminhoY. 
 			leituraDoCaminho(caminhoBuscadorID,origemX,origemY,1);
