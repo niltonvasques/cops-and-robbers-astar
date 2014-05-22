@@ -12,38 +12,41 @@ import com.badlogic.gdx.Input.Keys;
 public class AStar {
 
 	//Declare constants
-	public static final int mapWidth = 80, mapHeight = 60, tileSize = 20, numberPeople = 3;
-	public static final int notfinished = 0, notStarted = 0; // constantes relacionadas ao caminho
-	public static final int found = 1, nonexistent = 2; 
-	public static final int walkable = 0, unwalkable = 1;    // constantes referente a habilidade de andar.
+	public static final int larguraTela = 80, alturaTela = 60, tamanhoPixel = 20, qtdeAgentes = 3;
+	
+	// Constantes relacionadas ao caminho
+	public static final int naoTerminou = 0 ;
+	public static final int naoComecou = 0;
+	public static final int encontrado = 1, naoExiste = 2; 
+	public static final int caminhoPassavel = 0, caminhoBloqueado = 1;    // constantes referente a habilidade de andar.
 	public int onClosedList = 10;
 
 	//Create needed arrays
-	public char[][] walkability = new char[mapWidth][mapHeight];
-	public int[] openList = new int[mapWidth*mapHeight+2]; //array de 1 dimensão que segunda uma lista aberta de items
-	public int[][] whichList = new int[mapWidth+1][mapHeight+1];  //array de 2 dimensões usado para gravar  
+	public char[][] walkability = new char[larguraTela][alturaTela];
+	public int[] openList = new int[larguraTela*alturaTela+2]; //array de 1 dimensão que segunda uma lista aberta de items
+	public int[][] whichList = new int[larguraTela+1][alturaTela+1];  //array de 2 dimensões usado para gravar  
 	// 		se uma célula está na lista aberta ou na lista fechada.
-	public int[] openX = new int[mapWidth*mapHeight+2]; //array de 1 dimensão armazenando a posição x de um item na lista aberta.
-	public int[] openY = new int[mapWidth*mapHeight+2]; //array de 1 dimensão armazenando a posição y de um item na lista aberta.
-	public int[][] parentX = new int[mapWidth+1][mapHeight+1]; //array de 2 dimensões para armazenar o pai de cada célular x
-	public int[][] parentY = new int[mapWidth+1][mapHeight+1]; //array de 2 dimensões para armazenar o pai de cada célula y
-	public int[] Fcost = new int[mapWidth*mapHeight+2];	//array de 1 dimensão para armazenar o custo F de cada célula.
-	public int[][] Gcost = new int[mapWidth+1][mapHeight+1]; 	//array de 2 dimensões para armazenar o custo G para cada célula
-	public int[] Hcost = new int[mapWidth*mapHeight+2];	//array de 1 dimensão para armazenar o custo H de cada célula na lista aberta
-	public int[] pathLength = new int[numberPeople+1];     //armazena o tamanho do caminho encontrado para a criatura
-	public int[] pathLocation = new int[numberPeople+1];   //armazena a posição atual ao longo do caminho escolhido para a criatura		
-	//int* pathBank [numberPeople+1];
-	public List<Integer> pathBank[] = new List[numberPeople+1];
+	public int[] openX = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição x de um item na lista aberta.
+	public int[] openY = new int[larguraTela*alturaTela+2]; //array de 1 dimensão armazenando a posição y de um item na lista aberta.
+	public int[][] parentX = new int[larguraTela+1][alturaTela+1]; //array de 2 dimensões para armazenar o pai de cada célular x
+	public int[][] parentY = new int[larguraTela+1][alturaTela+1]; //array de 2 dimensões para armazenar o pai de cada célula y
+	public int[] Fcost = new int[larguraTela*alturaTela+2];	//array de 1 dimensão para armazenar o custo F de cada célula.
+	public int[][] Gcost = new int[larguraTela+1][alturaTela+1]; 	//array de 2 dimensões para armazenar o custo G para cada célula
+	public int[] Hcost = new int[larguraTela*alturaTela+2];	//array de 1 dimensão para armazenar o custo H de cada célula na lista aberta
+	public int[] pathLength = new int[qtdeAgentes+1];     //armazena o tamanho do caminho encontrado para a criatura
+	public int[] pathLocation = new int[qtdeAgentes+1];   //armazena a posição atual ao longo do caminho escolhido para a criatura		
+	//int* pathBank [qtdeAgentes+1];
+	public List<Integer> pathBank[] = new List[qtdeAgentes+1];
 	public List<Integer[]> pathBank2 = new ArrayList<Integer[]>();
 
 	//Path reading variables
-	public int[] pathStatus = new int[numberPeople+1];
-	public int[] xPath = new int[numberPeople+1];
-	public int[] yPath = new int[numberPeople+1];
+	public int[] pathStatus = new int[qtdeAgentes+1];
+	public int[] xPath = new int[qtdeAgentes+1];
+	public int[] yPath = new int[qtdeAgentes+1];
 
 	public void InitializePathfinder ()
 	{
-		for (int x = 0; x < numberPeople+1; x++){
+		for (int x = 0; x < qtdeAgentes+1; x++){
 			pathBank[x] = new Vector<Integer>();
 			pathBank2.add(new Integer[4]);
 		}
@@ -51,7 +54,7 @@ public class AStar {
 
 	public void  EndPathfinder ()
 	{
-		for (int x = 0; x < numberPeople+1; x++){
+		for (int x = 0; x < qtdeAgentes+1; x++){
 			pathBank[x].clear();
 			pathBank2.set(x, null);
 		}
@@ -63,40 +66,40 @@ public class AStar {
 		int onOpenList=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, newOpenListItemID=0;
 
 		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de walkability.
-		int startX = startingX/tileSize;
-		int startY = startingY/tileSize;	
-		targetX = targetX/tileSize;
-		targetY = targetY/tileSize;
+		int startX = startingX/tamanhoPixel;
+		int startY = startingY/tamanhoPixel;	
+		targetX = targetX/tamanhoPixel;
+		targetY = targetY/tamanhoPixel;
 
 		//2. Caminhos rápidos: Sobre certas circunstâncias, nenhum caminho é necessário.
 
 		// Se a posição inicial e o destino estão na mesmo lugar
 		if (startX == targetX && startY == targetY && pathLocation[pathfinderID] > 0)
-			return found;
+			return encontrado;
 		if (startX == targetX && startY == targetY && pathLocation[pathfinderID] == 0)
-			return nonexistent;
+			return naoExiste;
 
-		//Se o quadrado alvo é unwalkable(não andável), retorne que o caminho é inexistente.
-		if (walkability[targetX][targetY] == unwalkable)
+		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
+		if (walkability[targetX][targetY] == caminhoBloqueado)
 		{
 			xPath[pathfinderID] = startingX;
 			yPath[pathfinderID] = startingY;
-			return nonexistent;
+			return naoExiste;
 		}
 
 		//3. Resetando algumas variáveis que precisam ser limpas
 		if (onClosedList > 1000000) //Resetando whichList ocasionalmente
 		{
-			for (int x = 0; x < mapWidth; x++) {
-				for (int y = 0; y < mapHeight; y++)
+			for (int x = 0; x < larguraTela; x++) {
+				for (int y = 0; y < alturaTela; y++)
 					whichList [x][y] = 0;
 			}
 			onClosedList = 10;	
 		}
 		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list eh mais rapida do que redimensionar whichList() array;
 		onOpenList = onClosedList-1;
-		pathLength [pathfinderID] = notStarted;//i.e, = 0
-		pathLocation [pathfinderID] = notStarted;//i.e, = 0
+		pathLength [pathfinderID] = naoComecou;//i.e, = 0
+		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
 		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posicao inicial openList de quadrados para serem verificados.
@@ -171,45 +174,45 @@ public class AStar {
 					for (a = parentXval-1; a <= parentXval+1; a++){
 
 						// Se não sair do mapa (faça isto primeiro para evitar erros de ArrayIndexOutOfBounds).
-						if (a != -1 && b != -1 && a != mapWidth && b != mapHeight){
+						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
 
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
 							if (whichList[a][b] != onClosedList) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
-								if (walkability [a][b] != unwalkable) { 
+								if (walkability [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
-									corner = walkable;	
+									corner = caminhoPassavel;	
 									if (a == parentXval-1) 
 									{
 										if (b == parentYval-1)
 										{
-											if (walkability[parentXval-1][parentYval] == unwalkable || walkability[parentXval][parentYval-1] == unwalkable)  corner = unwalkable;
+											if (walkability[parentXval-1][parentYval] == caminhoBloqueado || walkability[parentXval][parentYval-1] == caminhoBloqueado)  corner = caminhoBloqueado;
 										}
 										else if (b == parentYval+1)
 										{
-											if (walkability[parentXval][parentYval+1] == unwalkable
-													|| walkability[parentXval-1][parentYval] == unwalkable) 
-												corner = unwalkable; 
+											if (walkability[parentXval][parentYval+1] == caminhoBloqueado
+													|| walkability[parentXval-1][parentYval] == caminhoBloqueado) 
+												corner = caminhoBloqueado; 
 										}
 									}
 									else if (a == parentXval+1)
 									{
 										if (b == parentYval-1)
 										{
-											if (walkability[parentXval][parentYval-1] == unwalkable 
-													|| walkability[parentXval+1][parentYval] == unwalkable) 
-												corner = unwalkable;
+											if (walkability[parentXval][parentYval-1] == caminhoBloqueado 
+													|| walkability[parentXval+1][parentYval] == caminhoBloqueado) 
+												corner = caminhoBloqueado;
 										}
 										else if (b == parentYval+1)
 										{
-											if (walkability[parentXval+1][parentYval] == unwalkable 
-													|| walkability[parentXval][parentYval+1] == unwalkable)
-												corner = unwalkable; 
+											if (walkability[parentXval+1][parentYval] == caminhoBloqueado 
+													|| walkability[parentXval][parentYval+1] == caminhoBloqueado)
+												corner = caminhoBloqueado; 
 										}
 									}	
-									if (corner == walkable) {
+									if (corner == caminhoPassavel) {
 
 										//		Se não já está na openList, adicione este para a openlist.			
 										if (whichList[a][b] != onOpenList) 
@@ -230,7 +233,7 @@ public class AStar {
 											Gcost[a][b] = Gcost[parentXval][parentYval] + addedGCost;
 
 											//Calcular os custos H e F e o pai
-											Hcost[openList[m]] = AStar.tileSize*(Math.abs(a - targetX) + Math.abs(b - targetY));
+											Hcost[openList[m]] = AStar.tamanhoPixel*(Math.abs(a - targetX) + Math.abs(b - targetY));
 											Fcost[openList[m]] = Gcost[a][b] + Hcost[openList[m]];
 											parentX[a][b] = parentXval ; parentY[a][b] = parentYval;	
 
@@ -322,20 +325,20 @@ public class AStar {
 			//9. Se a openList está vazia então não existe um caminho.
 			else
 			{
-				path = nonexistent; break;
+				path = naoExiste; break;
 			}  
 
 			//Se o alvo é adicionado a openList, então o caminho foi encontrado.
 			if (whichList[targetX][targetY] == onOpenList)
 			{
-				path = found; break;
+				path = encontrado; break;
 			}
 
 		}
 		while (true);//Faça o seguinte até que o caminho seja encontrado ou ele não exista.
 
 		//10. Salve o caminho se ele não exista.
-		if (path == found)
+		if (path == encontrado)
 		{
 
 			//a. Trabalhando para trás do alvo para a posição inicial, verificando 
@@ -390,7 +393,7 @@ public class AStar {
 	{
 		int ID = pathfinderID; //redundante, mas faz que o seguinte seja mais fácil para ler.
 		//Se um caminho tem sido encontrado para o pathfinder ...
-		if (pathStatus[ID] == found)
+		if (pathStatus[ID] == encontrado)
 		{
 
 			//Se path finder está apenas iniciando um novo vaminho ou tenha alcançado o
@@ -412,7 +415,7 @@ public class AStar {
 			{
 				if (Math.abs(currentX - xPath[ID]) < pixelsPerFrame 
 						&& Math.abs(currentY - yPath[ID]) < pixelsPerFrame) //Se perto o suficiente do quadrado do centro
-					pathStatus[ID] = notStarted; 
+					pathStatus[ID] = naoComecou; 
 			}
 		}
 
@@ -449,7 +452,7 @@ public class AStar {
 
 			//Ajusta a coordenada para ela ficar alinhada ao inicio do quadrado. 
 			//Assumindo que estamos usando sprites que não são centralizados..
-			x = (int) (tileSize*x);
+			x = (int) (tamanhoPixel*x);
 
 		}
 
@@ -473,7 +476,7 @@ public class AStar {
 
 			//Ajusta a coordenada para ela ficar alinhada ao inicio do quadrado. 
 			//Assumindo que estamos usando sprites que não são centralizados..
-			y = (int) ( tileSize*y);
+			y = (int) ( tamanhoPixel*y);
 
 		}
 		return y;
@@ -485,40 +488,40 @@ public class AStar {
 		int onOpenList=0, parentXval=0, parentYval=0, a=0, b=0, m=0, u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0, addedGCost=0, tempGcost = 0, path = 0, tempx, pathX, pathY, cellPosition, newOpenListItemID=0;
 
 		//1. Converta os dados da localização ( em pixels ) para as cordenadas do array de walkability.
-		int startX = startingX/tileSize;
-		int startY = startingY/tileSize;	
-		targetX = targetX/tileSize;
-		targetY = targetY/tileSize;
+		int startX = startingX/tamanhoPixel;
+		int startY = startingY/tamanhoPixel;	
+		targetX = targetX/tamanhoPixel;
+		targetY = targetY/tamanhoPixel;
 
 		//2. Caminhos rápidos: Sobre certas circunstâncias, nenhum caminho é necessário.
 
 		// Se a posição inicial e o destino estão na mesmo lugar
 		if (startX == targetX && startY == targetY && pathLocation[pathfinderID] > 0)
-			return found;
+			return encontrado;
 		if (startX == targetX && startY == targetY && pathLocation[pathfinderID] == 0)
-			return nonexistent;
+			return naoExiste;
 
-		//Se o quadrado alvo é unwalkable(não andável), retorne que o caminho é inexistente.
-		if (walkability[targetX][targetY] == unwalkable)
+		//Se o quadrado alvo é caminhoBloqueado(não andável), retorne que o caminho é inexistente.
+		if (walkability[targetX][targetY] == caminhoBloqueado)
 		{
 			xPath[pathfinderID] = startingX;
 			yPath[pathfinderID] = startingY;
-			return nonexistent;
+			return naoExiste;
 		}
 
 		//3. Resetando algumas variáveis que precisam ser limpas
 		if (onClosedList > 1000000) //Resetando whichList ocasionalmente
 		{
-			for (int x = 0; x < mapWidth; x++) {
-				for (int y = 0; y < mapHeight; y++)
+			for (int x = 0; x < larguraTela; x++) {
+				for (int y = 0; y < alturaTela; y++)
 					whichList [x][y] = 0;
 			}
 			onClosedList = 10;	
 		}
 		onClosedList = onClosedList+2; //alterando os valores da openList(lista aberta) e onClosed list é mais rapida do que redimming whichList() array;
 		onOpenList = onClosedList-1;
-		pathLength [pathfinderID] = notStarted;//i.e, = 0
-		pathLocation [pathfinderID] = notStarted;//i.e, = 0
+		pathLength [pathfinderID] = naoComecou;//i.e, = 0
+		pathLocation [pathfinderID] = naoComecou;//i.e, = 0
 		Gcost[startX][startY] = 0; //resetando o quadrado inicial com o valor de G para 0
 
 		//4. Adicionando a posição inicial openList de quadrados para serem verificados.
@@ -593,45 +596,45 @@ public class AStar {
 					for (a = parentXval-1; a <= parentXval+1; a++){
 
 						// Se não sair do mapa (faça isto primeiro para evitar erros de ArrayIndexOutOfBounds).
-						if (a != -1 && b != -1 && a != mapWidth && b != mapHeight){
+						if (a != -1 && b != -1 && a != larguraTela && b != alturaTela){
 
 							//		Se não já está no closedList (items na closedList são items que já foram considerados e podem ser ignorados).
 							if (whichList[a][b] != onClosedList) { 
 
 								// 		Se não é um quadrado parede/obstaculo;
-								if (walkability [a][b] != unwalkable) { 
+								if (walkability [a][b] != caminhoBloqueado) { 
 
 									//		Não corte as bordas cruzadas.
-									corner = walkable;	
+									corner = caminhoPassavel;	
 									if (a == parentXval-1) 
 									{
 										if (b == parentYval-1)
 										{
-											if (walkability[parentXval-1][parentYval] == unwalkable || walkability[parentXval][parentYval-1] == unwalkable)  corner = unwalkable;
+											if (walkability[parentXval-1][parentYval] == caminhoBloqueado || walkability[parentXval][parentYval-1] == caminhoBloqueado)  corner = caminhoBloqueado;
 										}
 										else if (b == parentYval+1)
 										{
-											if (walkability[parentXval][parentYval+1] == unwalkable
-													|| walkability[parentXval-1][parentYval] == unwalkable) 
-												corner = unwalkable; 
+											if (walkability[parentXval][parentYval+1] == caminhoBloqueado
+													|| walkability[parentXval-1][parentYval] == caminhoBloqueado) 
+												corner = caminhoBloqueado; 
 										}
 									}
 									else if (a == parentXval+1)
 									{
 										if (b == parentYval-1)
 										{
-											if (walkability[parentXval][parentYval-1] == unwalkable 
-													|| walkability[parentXval+1][parentYval] == unwalkable) 
-												corner = unwalkable;
+											if (walkability[parentXval][parentYval-1] == caminhoBloqueado 
+													|| walkability[parentXval+1][parentYval] == caminhoBloqueado) 
+												corner = caminhoBloqueado;
 										}
 										else if (b == parentYval+1)
 										{
-											if (walkability[parentXval+1][parentYval] == unwalkable 
-													|| walkability[parentXval][parentYval+1] == unwalkable)
-												corner = unwalkable; 
+											if (walkability[parentXval+1][parentYval] == caminhoBloqueado 
+													|| walkability[parentXval][parentYval+1] == caminhoBloqueado)
+												corner = caminhoBloqueado; 
 										}
 									}	
-									if (corner == walkable) {
+									if (corner == caminhoPassavel) {
 
 										//		Se não já está na openList, adicione este para a openlist.			
 										if (whichList[a][b] != onOpenList) 
@@ -744,20 +747,20 @@ public class AStar {
 			//9. Se a openList está vazia então não existe um caminho.
 			else
 			{
-				path = nonexistent; break;
+				path = naoExiste; break;
 			}  
 
 			//Se o alvo é adicionado a openList, então o caminho foi encontrado.
 			if (whichList[targetX][targetY] == onOpenList)
 			{
-				path = found; break;
+				path = encontrado; break;
 			}
 
 		}
 		while (true);//Faça o seguinte até que o caminho seja encontrado ou ele não exista.
 
 		//10. Salve o caminho se ele não exista.
-		if (path == found)
+		if (path == encontrado)
 		{
 
 			//a. Trabalhando para trás do alvo para a posição inicial, verificando 

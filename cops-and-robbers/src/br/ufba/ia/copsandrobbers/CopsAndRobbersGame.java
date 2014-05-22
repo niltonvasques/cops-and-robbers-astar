@@ -146,8 +146,8 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		for (int x = 0; x <= 79; x++){
 			for (int y = 0; y <= 59; y++){
 			//Draw blue walls
-			if (aStar.walkability[x][y] == aStar.unwalkable) {
-				pixmap.fillRectangle(x*AStar.tileSize,y*AStar.tileSize,AStar.tileSize,AStar.tileSize);
+			if (aStar.walkability[x][y] == aStar.caminhoBloqueado) {
+				pixmap.fillRectangle(x*AStar.tamanhoPixel,y*AStar.tamanhoPixel,AStar.tamanhoPixel,AStar.tamanhoPixel);
 			}
 		}}		
 		Texture map = new Texture(pixmap);
@@ -172,8 +172,8 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			for (int y = 0; y <= 59; y++){
 
 				//Draw blue walls
-//				if (aStar.walkability[x][y] == AStar.unwalkable) 
-//					batch.draw(wallImage,x*AStar.tileSize,y*AStar.tileSize,AStar.tileSize,AStar.tileSize);
+//				if (aStar.walkability[x][y] == AStar.caminhoBloqueado) 
+//					batch.draw(wallImage,x*AStar.tamanhoPixel,y*AStar.tamanhoPixel,AStar.tamanhoPixel,AStar.tamanhoPixel);
 			}}
 		}
 	}
@@ -185,8 +185,8 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			camera.unproject(touchPos);
 			
-			int x = ((int)touchPos.x)/AStar.tileSize;
-			int y = ((int)touchPos.y)/AStar.tileSize;
+			int x = ((int)touchPos.x)/AStar.tamanhoPixel;
+			int y = ((int)touchPos.y)/AStar.tamanhoPixel;
 			aStar.walkability[x][y] = (char)(1-aStar.walkability[x][y]);
 		}
 	}
@@ -224,7 +224,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			{
 				for (int x = 0; x <= 79; x++){
 					for (int y = 0; y <= 59; y++){
-						aStar.walkability [x][y] = (char)aStar.walkable;
+						aStar.walkability [x][y] = (char)aStar.caminhoPassavel;
 				}}
 			}
 		} catch (FileNotFoundException e) {
@@ -264,7 +264,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		{
 		//If no path has been generated, generate one. Update it when
 		//the chaser reaches its fifth step on the current path.	
-		if (aStar.pathStatus[ID] == AStar.notStarted || aStar.pathLocation[ID] == 10)
+		if (aStar.pathStatus[ID] == AStar.naoComecou|| aStar.pathLocation[ID] == 10)
 		{
 			//Generate a new path. Enter coordinates of smiley sprite (xLoc(1)/
 			//yLoc(1)) as the target.
@@ -279,7 +279,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 		}} 
 
 	//2.Move chaser.
-		if (aStar.pathStatus[ID] == AStar.found) MoveSprite(ID);
+		if (aStar.pathStatus[ID] == AStar.encontrado) MoveSprite(ID);
 	}
 	
 	void MoveSmiley(){
@@ -301,7 +301,7 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			}
 
 		//2.Move smiley.
-			if (aStar.pathStatus[ID] == AStar.found) MoveSprite(ID);
+			if (aStar.pathStatus[ID] == AStar.encontrado) MoveSprite(ID);
 	}
 	
 	void MoveSprite(int ID){
@@ -340,9 +340,9 @@ public class CopsAndRobbersGame implements ApplicationListener {
 			
 			DrawMap(batch);
 			
-			batch.draw(smiley,xLoc[1],yLoc[1],AStar.tileSize,AStar.tileSize);
+			batch.draw(smiley,xLoc[1],yLoc[1],AStar.tamanhoPixel,AStar.tamanhoPixel);
 			for (char ID = 2; ID <= 3; ID++)
-				batch.draw(chaser,xLoc[ID],yLoc[ID],AStar.tileSize,AStar.tileSize);
+				batch.draw(chaser,xLoc[ID],yLoc[ID],AStar.tamanhoPixel,AStar.tamanhoPixel);
 	
 			//Show directions
 			if (g_showDirections != 0) 
